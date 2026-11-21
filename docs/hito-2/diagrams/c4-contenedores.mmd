@@ -1,0 +1,18 @@
+flowchart LR
+  user["Persona<br/>Operador comercial / inventario"]
+  subgraph system["Sistema GIRC — despliegue actual con Docker Compose"]
+    browser["Contenedor lógico: Navegador<br/>React 18 + TypeScript + Vite<br/>SPA, HTML/CSS/JS"]
+    proxy["Contenedor: Frontend / reverse proxy<br/>Nginx<br/>sirve SPA y proxy /api/v1"]
+    api["Contenedor: API GIRC<br/>Java 21 + Spring Boot 3.4<br/>REST / JSON, Spring Data JPA"]
+    db[("Contenedor: PostgreSQL 16<br/>Base relacional girc_db")]
+  end
+  event["Spring ApplicationEventPublisher<br/>Evento en memoria, dentro de la API"]
+
+  user -->|Interactúa| browser
+  browser -->|HTTP local :5173 / HTTP :80| proxy
+  proxy -->|HTTP /api/v1| api
+  api -->|JDBC| db
+  api -->|publishEvent(PedidoCreadoEvent)<br/>sin subscriber GIRC actualmente| event
+
+  note["Producción recomendada, no configurada:<br/>TLS termina en proxy con certificado; restringir DB a red privada;<br/>secretos mediante gestor de secretos; backups/observabilidad"]
+  note -.-> proxy

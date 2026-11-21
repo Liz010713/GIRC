@@ -1,0 +1,31 @@
+flowchart TB
+  subgraph backend["Contenedor API — componentes observados en el código"]
+    restPedido["controller.PedidoController<br/>POST /api/v1/pedidos<br/>@Valid, HTTP 201"]
+    restProducto["controller.ProductoController<br/>GET /api/v1/productos"]
+    service["service.PedidoService / PedidoServiceImpl<br/>idempotencia, stock, total, transacción"]
+    repoPedido["repository.PedidoRepository<br/>JpaRepository + existsByClaveIdempotencia"]
+    repoProducto["repository.ProductoRepository<br/>JpaRepository + findByIdWithLock"]
+    publisher["ApplicationEventPublisher<br/>PedidoCreadoEvent"]
+    handler["exception.GlobalExceptionHandler<br/>400 / 404 / 409 / 422"]
+    entities["domain.entity<br/>Producto, Pedido, DetallePedido<br/>y entidades heredadas Cancha/Reserva/Jugador"]
+    dto["dto.CrearPedidoRequest<br/>record + Jakarta Validation"]
+    db[("PostgreSQL<br/>productos, pedidos, detalles_pedido")]
+    filter["Seguridad HTTP / filtros JWT<br/>No implementados actualmente"]
+    emailListener["NotificacionListener<br/>@Async / AFTER_COMMIT para ReservaCreadaEvent;<br/>solo log, no SMTP real"]
+  end
+
+  restPedido --> dto
+  restPedido --> service
+  service --> repoPedido
+  service --> repoProducto
+  repoPedido --> entities
+  repoProducto --> entities
+  repoPedido --> db
+  repoProducto --> db
+  service --> publisher
+  publisher -.->|Sin consumidor de pedido hoy| emailListener
+  restProducto -->|Acceso directo actual; mejora recomendada: ProductoService| repoProducto
+  restPedido -.-> handler
+  restProducto -.-> handler
+  service -.-> entities
+  filter -.-> restPedido

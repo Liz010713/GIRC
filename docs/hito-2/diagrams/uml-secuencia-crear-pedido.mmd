@@ -1,0 +1,64 @@
+sequenceDiagram
+  autonumber
+  actor Operador
+  participant UI as SPA React (GIRC)
+  participant Proxy as Nginx (Docker, si aplica)
+  participant Controller as PedidoController
+  participant Valid as Jakarta Validation
+  participant Service as PedidoServiceImpl
+  participant PedidoRepo as PedidoRepository
+  participant ProductoRepo as ProductoRepository
+  participant DB as PostgreSQL
+  participant Events as ApplicationEventPublisher
+  participant Advice as GlobalExceptionHandler
+
+  Operador->>UI: Selecciona SKU/cantidad y confirma
+  UI->>Proxy: POST /api/v1/pedidos + JSON
+  Proxy->>Controller: Reenvía HTTP
+  Controller->>Valid: @Valid CrearPedidoRequest
+  alt Request inválido
+    Valid-->>Controller: MethodArgumentNotValidException
+    Controller->>Advice: Manejo centralizado
+    Advice-->>Proxy: 400 ErrorResponse
+    Proxy-->>UI: 400 JSON
+  else Request válido
+    Valid-->>Controller: Request validado
+    Controller->>Service: crearPedido(request)
+    Service->>PedidoRepo: existsByClaveIdempotencia(clave)
+    PedidoRepo->>DB: SELECT EXISTS
+    DB-->>PedidoRepo: existe / no existe
+    alt Clave idempotente repetida
+      PedidoRepo-->>Service: true
+      Service-->>Advice: ConflictoNegocioException
+      Advice-->>Proxy: 409 ErrorResponse
+      Proxy-->>UI: 409 JSON
+    else Clave nueva
+      loop Por cada producto solicitado
+        Service->>ProductoRepo: findByIdWithLock(id) [PESSIMISTIC_WRITE]
+        ProductoRepo->>DB: SELECT ... FOR UPDATE
+        DB-->>ProductoRepo: Producto bloqueado
+        ProductoRepo-->>Service: Producto
+      end
+      alt Algún producto no existe
+        Service-->>Advice: RecursoNoEncontradoException
+        Advice-->>Proxy: 404 ErrorResponse
+        Proxy-->>UI: 404 JSON
+      else Stock de algún ítem insuficiente
+        Service-->>Advice: StockInsuficienteException
+        Advice-->>Proxy: 422 ErrorResponse
+        Proxy-->>UI: 422 JSON
+        Note over Service,DB: @Transactional revierte; no guarda pedido ni evento.
+      else Stock válido para todos los ítems
+        Service->>Service: Calcula subtotales/total y estados de stock
+        Service->>PedidoRepo: save(Pedido + detalles)
+        PedidoRepo->>DB: INSERT pedido y detalles; flush/commit transaccional
+        DB-->>PedidoRepo: Pedido persistido
+        PedidoRepo-->>Service: Pedido guardado
+        Service->>Events: publishEvent(PedidoCreadoEvent)
+        Note over Events: No existe listener GIRC de PedidoCreadoEvent en la implementación actual.
+        Service-->>Controller: Pedido
+        Controller-->>Proxy: 201 Created + JSON
+        Proxy-->>UI: 201 JSON
+      end
+    end
+  end

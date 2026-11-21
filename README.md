@@ -79,6 +79,14 @@ docker compose up --build -d
 
 El archivo `.env` está excluido de Git. No uses las credenciales de ejemplo en un entorno publicado.
 
+## Arquitectura y diseño — Parcial 2
+
+- [Documento Maestro GIRC](docs/hito-2/Documento-Maestro-Parcial-2.md)
+- [Diagramas C4 y UML renderizados](docs/hito-2/diagramas.md)
+- [Diccionario de datos y mapeo JPA](docs/hito-2/persistencia/diccionario-datos.md)
+- [ADRs](docs/hito-2/adr/README.md)
+- [Guía de exportación PDF/Word](docs/hito-2/README-exportacion.md)
+
 ## Estructura
 
 El backend conserva la estructura de paquetes entregada en la plantilla del curso y organiza el código por `controller`, `domain.entity`, `dto`, `exception`, `repository` y `service`. Los módulos de producto y pedido implementan el flujo GIRC; la pantalla principal está orientada a inventario y comercialización.

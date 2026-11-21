@@ -1,0 +1,20 @@
+flowchart LR
+  operador["Persona: Operador comercial / inventario<br/>Consulta existencias y prepara pedidos"]
+  admin["Persona: Administrador del sistema<br/>Mantiene configuración y catálogo<br/>(rol/autorización no implementados)"]
+  girc["Sistema de software: GIRC<br/>Gestión Integral de Recursos y Comercialización<br/>Consulta inventario y registra pedidos"]
+  postgres[("Sistema externo: PostgreSQL 16<br/>Persistencia relacional")]
+  correo["Sistema externo propuesto: SMTP<br/>No conectado a pedidos; el listener existente<br/>solo registra notificaciones de reservas"]
+  pago["Sistema externo: Pasarela de pago<br/>Fuera del alcance GIRC actual"]
+
+  operador -->|HTTPS en producción / HTTP local| girc
+  admin -->|HTTPS en producción / HTTP local| girc
+  girc -->|JDBC / SQL| postgres
+  girc -.->|Integración futura, no implementada| correo
+  girc -.->|No aplica al flujo actual| pago
+
+  classDef system fill:#e7f2ec,stroke:#24634d,color:#173a32,stroke-width:2px
+  classDef person fill:#fff4d8,stroke:#c78631,color:#3d2c12
+  classDef external fill:#eef1f4,stroke:#65747f,color:#24313a
+  class girc system
+  class operador,admin person
+  class postgres,correo,pago external

@@ -1,0 +1,87 @@
+classDiagram
+  class Producto {
+    +Long id
+    +String sku
+    +String nombreProducto
+    +BigDecimal precioUnitario
+    +Integer stockActual
+    +Integer stockMinimo
+    +String estado
+  }
+  class Pedido {
+    +Long id
+    +String codigoOrden
+    +Long idUsuario
+    +String claveIdempotencia
+    +BigDecimal totalNeto
+    +String estado
+    +OffsetDateTime fechaCreacion
+  }
+  class DetallePedido {
+    +Long id
+    +Integer cantidadSolicitada
+    +BigDecimal precioUnitario
+    +BigDecimal subtotal
+  }
+  class Jugador {
+    +Long id
+    +String nombre
+    +String email
+  }
+  class Cancha {
+    +Long id
+    +String nombre
+    +TipoCancha tipoCancha
+    +Double tarifaHora
+    +Boolean activa
+  }
+  class Reserva {
+    +Long id
+    +String codigoConfirmacion
+    +Long usuarioId
+    +OffsetDateTime fechaHoraInicio
+    +OffsetDateTime fechaHoraFin
+    +Integer duracionHoras
+    +Double valorTotal
+    +Double valorAnticipo
+    +EstadoReserva estado
+    +OffsetDateTime fechaCreacion
+    +OffsetDateTime fechaExpiracionPago
+  }
+  class TipoCancha {
+    <<enumeration>>
+    PADEL
+    FUTBOL_5
+    TENIS
+  }
+  class EstadoReserva {
+    <<enumeration>>
+    PENDIENTE_PAGO
+    CONFIRMADA
+    CANCELADA
+    CANCELADA_CON_PENALIDAD
+    EXPIRADA
+    FINALIZADA
+  }
+  class PedidoServiceImpl {
+    +crearPedido(request) Pedido
+    -calcularEstadoProducto(producto) String
+  }
+  class ReservaServiceImpl {
+    +crearReserva(request, usuarioId) ReservaResponse
+  }
+
+  Pedido "1" *-- "0..*" DetallePedido : detalles / cascade ALL
+  DetallePedido "0..*" --> "1" Producto : producto
+  Reserva "0..*" --> "1" Cancha : cancha
+  Cancha --> TipoCancha
+  Reserva --> EstadoReserva
+  Pedido ..> Jugador : idUsuario escalar, sin FK JPA
+  Reserva ..> Jugador : usuarioId escalar, sin FK JPA
+  PedidoServiceImpl ..> Pedido : construye y guarda
+  PedidoServiceImpl ..> Producto : valida y actualiza stock
+  ReservaServiceImpl ..> Reserva : construye y guarda
+
+  note for Pedido "La solicitud valida 1..n items, pero JPA/DDL no fuerza que una fila Pedido tenga al menos un detalle. Estado se modela String, no enum."
+  note for Producto "estado se modela String; niveles válidos aplicados por PedidoServiceImpl."
+  note for PedidoServiceImpl "Las entidades actuales son anémicas: las reglas de dominio viven en los servicios, no en métodos de entidad."
