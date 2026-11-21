@@ -6,9 +6,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAsync
-public class CourtSyncProApplication {
+public class GircApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CourtSyncProApplication.class, args);
+        SpringApplication.run(GircApplication.class, args);
     }
 }

@@ -1,9 +1,9 @@
 spring:
   application:
-    name: courtsync-pro
+    name: girc
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/courtsync_db}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/girc_db}
+    username: ${SPRING_DATASOURCE_USERNAME:girc}
     password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
   jpa:

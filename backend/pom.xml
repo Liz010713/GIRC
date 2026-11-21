@@ -11,11 +11,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.courtsync</groupId>
-    <artifactId>courtsync-pro</artifactId>
+    <groupId>com.girc</groupId>
+    <artifactId>girc-backend</artifactId>
     <version>1.0.0</version>
-    <name>CourtSync Pro</name>
-    <description>MVP Sistema de Reserva de Canchas Deportivas - Spec-Driven Development</description>
+    <name>GIRC</name>
+    <description>Sistema de Gestión Integral de Recursos y Comercialización</description>
 
     <properties>
         <java.version>21</java.version>

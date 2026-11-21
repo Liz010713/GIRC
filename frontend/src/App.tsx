@@ -1,22 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ApiError,
-  consultarDisponibilidad,
-  crearReserva,
-  DisponibilidadCanchaResponse,
-  FranjaHorariaDTO,
-  ReservaResponse,
-  TipoCancha,
-} from './services/reservaApi';
+  crearPedido,
+  listarProductos,
+  PedidoResponse,
+  Producto,
+} from './services/gircApi';
+import './girc.css';
 
-interface SlotSeleccionado {
-  cancha: DisponibilidadCanchaResponse;
-  franja: FranjaHorariaDTO;
-}
-
-function getTodayUtcIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+type StockFilter = 'todos' | 'disponibles' | 'criticos' | 'agotados';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('es-CO', {
@@ -26,354 +18,307 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-function formatCountdown(secondsLeft: number): string {
-  const safe = Math.max(0, secondsLeft);
-  const mins = Math.floor(safe / 60);
-  const secs = safe % 60;
-  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+function stockTone(estado: string): string {
+  if (estado === 'Agotado') return 'stock-empty';
+  if (estado === 'Crítico') return 'stock-low';
+  return 'stock-ready';
 }
 
 export function App() {
-  const [fecha, setFecha] = useState<string>(getTodayUtcIso);
-  const [tipoCancha, setTipoCancha] = useState<TipoCancha | ''>('');
-  const [canchas, setCanchas] = useState<DisponibilidadCanchaResponse[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [errorState, setErrorState] = useState<{ status: number; message: string } | null>(null);
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [cantidades, setCantidades] = useState<Record<number, number>>({});
+  const [busqueda, setBusqueda] = useState('');
+  const [filtroStock, setFiltroStock] = useState<StockFilter>('todos');
+  const [idUsuario, setIdUsuario] = useState(1);
+  const [cargando, setCargando] = useState(true);
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pedidoCreado, setPedidoCreado] = useState<PedidoResponse | null>(null);
 
-  const [slotSeleccionado, setSlotSeleccionado] = useState<SlotSeleccionado | null>(null);
-  const [duracionHoras, setDuracionHoras] = useState<1 | 2>(1);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  const [reservaConfirmada, setReservaConfirmada] = useState<ReservaResponse | null>(null);
-  const [segundosRestantes, setSegundosRestantes] = useState<number>(600);
-
-  const cargarDisponibilidad = useCallback(async () => {
-    setIsLoading(true);
-    setErrorState(null);
+  async function cargarProductos() {
+    setCargando(true);
+    setError(null);
     try {
-      const data = await consultarDisponibilidad(fecha, tipoCancha);
-      setCanchas(data);
+      setProductos(await listarProductos());
     } catch (err) {
-      if (err instanceof ApiError) {
-        setErrorState({ status: err.status, message: err.message });
-      } else {
-        setErrorState({ status: 500, message: 'Error de conexión con el servidor.' });
-      }
-      setCanchas([]);
+      setError(err instanceof Error ? err.message : 'No fue posible cargar el inventario.');
     } finally {
-      setIsLoading(false);
+      setCargando(false);
     }
-  }, [fecha, tipoCancha]);
+  }
 
   useEffect(() => {
-    void cargarDisponibilidad();
-  }, [cargarDisponibilidad]);
+    void cargarProductos();
+  }, []);
 
-  // Live 10-minute countdown timer for Confirmation State (RN-03)
-  useEffect(() => {
-    if (!reservaConfirmada) return;
+  const productosFiltrados = useMemo(() => {
+    const texto = busqueda.trim().toLocaleLowerCase('es');
+    return productos.filter((producto) => {
+      const coincideTexto = `${producto.nombreProducto} ${producto.sku}`
+        .toLocaleLowerCase('es')
+        .includes(texto);
+      const coincideStock = filtroStock === 'todos'
+        || (filtroStock === 'disponibles' && producto.estado === 'Disponible')
+        || (filtroStock === 'criticos' && producto.estado === 'Crítico')
+        || (filtroStock === 'agotados' && producto.estado === 'Agotado');
+      return coincideTexto && coincideStock;
+    });
+  }, [productos, busqueda, filtroStock]);
 
-    const calcularSegundos = () => {
-      const expiraMs = new Date(reservaConfirmada.fechaExpiracionPago).getTime();
-      return Math.max(0, Math.floor((expiraMs - Date.now()) / 1000));
-    };
+  const lineasPedido = useMemo(() => productos
+    .filter((producto) => (cantidades[producto.id] ?? 0) > 0)
+    .map((producto) => ({ producto, cantidad: cantidades[producto.id] })), [productos, cantidades]);
 
-    setSegundosRestantes(calcularSegundos());
-    const intervalId = window.setInterval(() => {
-      setSegundosRestantes(calcularSegundos());
-    }, 1000);
+  const totalPedido = lineasPedido.reduce(
+    (total, linea) => total + linea.producto.precioUnitario * linea.cantidad,
+    0,
+  );
+  const unidadesPedido = lineasPedido.reduce((total, linea) => total + linea.cantidad, 0);
+  const disponibles = productos.filter((producto) => producto.estado === 'Disponible').length;
+  const criticos = productos.filter((producto) => producto.estado === 'Crítico').length;
 
-    return () => window.clearInterval(intervalId);
-  }, [reservaConfirmada]);
+  function cambiarCantidad(producto: Producto, cantidad: number) {
+    const segura = Math.max(0, Math.min(producto.stockActual, cantidad));
+    setCantidades((actuales) => ({ ...actuales, [producto.id]: segura }));
+  }
 
-  const calculosModal = useMemo(() => {
-    if (!slotSeleccionado) {
-      return { valorTotal: 0, valorAnticipo: 0 };
-    }
-    const valorTotal = slotSeleccionado.cancha.tarifaHora * duracionHoras;
-    const valorAnticipo = valorTotal * 0.5;
-    return { valorTotal, valorAnticipo };
-  }, [slotSeleccionado, duracionHoras]);
-
-  const abrirModalReserva = (cancha: DisponibilidadCanchaResponse, franja: FranjaHorariaDTO) => {
-    setErrorState(null);
-    setDuracionHoras(1);
-    setSlotSeleccionado({ cancha, franja });
-  };
-
-  const handleConfirmarReserva = async () => {
-    if (!slotSeleccionado || isSubmitting) return;
-
-    setIsSubmitting(true);
-    setErrorState(null);
-
+  async function confirmarPedido() {
+    if (lineasPedido.length === 0 || enviando) return;
+    setEnviando(true);
+    setError(null);
     try {
-      const fechaHoraInicio = `${fecha}T${slotSeleccionado.franja.horaInicio}:00Z`;
-      const reserva = await crearReserva({
-        canchaId: slotSeleccionado.cancha.canchaId,
-        fechaHoraInicio,
-        duracionHoras,
+      const pedido = await crearPedido({
+        idUsuario,
+        claveIdempotencia: crypto.randomUUID(),
+        items: lineasPedido.map(({ producto, cantidad }) => ({
+          idProducto: producto.id,
+          cantidadSolicitada: cantidad,
+        })),
       });
-
-      setSlotSeleccionado(null);
-      setReservaConfirmada(reserva);
+      setPedidoCreado(pedido);
+      setCantidades({});
+      await cargarProductos();
     } catch (err) {
-      if (err instanceof ApiError) {
-        setErrorState({ status: err.status, message: err.message });
-        if (err.status === 409) {
-          setSlotSeleccionado(null);
-          void cargarDisponibilidad();
-        }
-      } else {
-        setErrorState({ status: 500, message: 'No fue posible procesar la reserva.' });
-      }
+      setError(err instanceof ApiError ? err.message : 'No fue posible registrar el pedido.');
     } finally {
-      setIsSubmitting(false);
+      setEnviando(false);
     }
-  };
-
-  const volverAGrilla = () => {
-    setReservaConfirmada(null);
-    void cargarDisponibilidad();
-  };
+  }
 
   return (
-    <div className="container">
-      <header className="header">
-        <div>
-          <h1>CourtSync Pro</h1>
-          <p>Reserva de canchas deportivas con bloqueo temporal e integridad transaccional</p>
+    <div className="app-shell">
+      <aside className="sidebar">
+        <a className="brand" href="#inicio" aria-label="GIRC, inicio">
+          <span className="brand-mark">G</span>
+          <span>GIRC</span>
+        </a>
+        <div className="sidebar-caption">GESTIÓN COMERCIAL</div>
+        <nav className="primary-nav" aria-label="Navegación principal">
+          <a className="nav-item nav-active" href="#inventario">
+            <span className="nav-icon" aria-hidden="true">▦</span>
+            Inventario
+          </a>
+          <a className="nav-item" href="#pedido">
+            <span className="nav-icon" aria-hidden="true">＋</span>
+            Nuevo pedido
+            {unidadesPedido > 0 && <span className="nav-count">{unidadesPedido}</span>}
+          </a>
+        </nav>
+        <div className="sidebar-footer">
+          <span className="status-dot" />
+          <span>Operación local</span>
+          <span className="version-label">v1.0</span>
         </div>
-      </header>
+      </aside>
 
-      {/* Estado 3: Error State (Banner rojo 409 / Alerta ámbar 422 o 400) */}
-      {errorState && (
-        <div
-          className={`alert ${errorState.status === 409 ? 'alert-409' : 'alert-422'}`}
-          role="alert"
-        >
-          <div>
-            <span className="alert-title">
-              {errorState.status === 409
-                ? 'Conflicto de horario (409 Conflict)'
-                : `Validación de regla (${errorState.status})`}
-            </span>
-            <span>{errorState.message}</span>
-          </div>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setErrorState(null)}
-          >
-            Cerrar
-          </button>
-        </div>
-      )}
+      <main className="main-area" id="inicio">
+        <header className="topbar">
+          <div className="breadcrumb">GIRC <span>/</span> Inventario</div>
+          <label className="user-field" htmlFor="user-id">
+            <span>Usuario</span>
+            <input
+              id="user-id"
+              type="number"
+              min="1"
+              value={idUsuario}
+              onChange={(event) => setIdUsuario(Math.max(1, Number(event.target.value)))}
+              aria-label="Identificador del usuario"
+            />
+          </label>
+        </header>
 
-      {/* Estado 4: Confirmation State (201 Created) */}
-      {reservaConfirmada ? (
-        <section className="confirmation-card" aria-live="polite">
-          <span className="badge badge-pending">{reservaConfirmada.estado}</span>
-          <div className="confirmation-code">{reservaConfirmada.codigoConfirmacion}</div>
-          <p>
-            Tu turno ha sido bloqueado temporalmente en{' '}
-            <strong>{reservaConfirmada.canchaNombre}</strong>.
-          </p>
-
-          <div className="summary-box">
-            <div className="summary-row">
-              <span>Fecha y hora (UTC):</span>
-              <strong>{new Date(reservaConfirmada.fechaHoraInicio).toUTCString()}</strong>
+        <div className="page-content">
+          <section className="page-heading">
+            <div>
+              <p className="eyebrow">CONTROL DE RECURSOS</p>
+              <h1>Inventario y pedidos</h1>
+              <p className="page-description">Consulta existencias y prepara pedidos desde un solo lugar.</p>
             </div>
-            <div className="summary-row">
-              <span>Duración:</span>
-              <strong>{reservaConfirmada.duracionHoras} hora(s)</strong>
-            </div>
-            <div className="summary-row">
-              <span>Valor total:</span>
-              <strong>{formatCurrency(reservaConfirmada.valorTotal)}</strong>
-            </div>
-            <div className="summary-row highlight">
-              <span>Anticipo requerido (50%):</span>
-              <strong>{formatCurrency(reservaConfirmada.valorAnticipo)}</strong>
-            </div>
-          </div>
-
-          <div className="countdown-box">
-            <div>Tiempo restante para confirmar el pago del anticipo (RN-03)</div>
-            <div className="countdown-timer">{formatCountdown(segundosRestantes)}</div>
-          </div>
-
-          <button type="button" className="btn btn-primary" onClick={volverAGrilla}>
-            Consultar más horarios
-          </button>
-        </section>
-      ) : (
-        <>
-          <section className="filters-card">
-            <div className="field">
-              <label htmlFor="fecha-input">Fecha</label>
-              <input
-                id="fecha-input"
-                type="date"
-                value={fecha}
-                min={getTodayUtcIso()}
-                disabled={isLoading}
-                onChange={(e) => setFecha(e.target.value)}
-              />
-            </div>
-
-            <div className="field">
-              <label htmlFor="tipo-select">Tipo de Cancha</label>
-              <select
-                id="tipo-select"
-                value={tipoCancha}
-                disabled={isLoading}
-                onChange={(e) => setTipoCancha(e.target.value as TipoCancha | '')}
-              >
-                <option value="">Todas</option>
-                <option value="PADEL">Pádel</option>
-                <option value="FUTBOL_5">Fútbol 5</option>
-                <option value="TENIS">Tenis</option>
-              </select>
-            </div>
-
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={isLoading}
-              onClick={() => void cargarDisponibilidad()}
-            >
-              {isLoading ? 'Consultando...' : 'Actualizar'}
+            <button type="button" className="refresh-button" onClick={() => void cargarProductos()} disabled={cargando}>
+              <span aria-hidden="true">↻</span> Actualizar
             </button>
           </section>
 
-          {/* Estado 1: Loading State */}
-          {isLoading ? (
-            <section className="skeleton-grid" aria-label="Cargando disponibilidad">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="skeleton-card">
-                  <div className="skeleton-line short" />
-                  <div className="skeleton-line" />
-                  <div className="skeleton-line tall" />
-                </div>
-              ))}
-            </section>
-          ) : canchas.length === 0 ? (
-            <section className="empty-state">
-              <p>No hay horarios disponibles para la fecha o filtro seleccionado.</p>
-            </section>
-          ) : (
-            /* Estado 2: Success / Data State */
-            <section className="courts-grid">
-              {canchas.map((cancha) => (
-                <article key={cancha.canchaId} className="court-card">
-                  <div className="court-header">
-                    <div>
-                      <h2 className="court-title">{cancha.nombre}</h2>
-                      <div className="court-meta">
-                        Tarifa: {formatCurrency(cancha.tarifaHora)} / hora
-                      </div>
-                    </div>
-                    <span className="badge badge-type">{cancha.tipoCancha}</span>
-                  </div>
+          <section className="metric-strip" aria-label="Resumen de inventario">
+            <div className="metric">
+              <span className="metric-label">Referencias registradas</span>
+              <strong>{cargando ? '—' : productos.length}</strong>
+              <span className="metric-note">SKU en catálogo</span>
+            </div>
+            <div className="metric">
+              <span className="metric-label">Disponibles</span>
+              <strong>{cargando ? '—' : disponibles}</strong>
+              <span className="metric-note">Sobre nivel mínimo</span>
+            </div>
+            <div className="metric metric-warning">
+              <span className="metric-label">Stock crítico</span>
+              <strong>{cargando ? '—' : criticos}</strong>
+              <span className="metric-note">Revisar reposición</span>
+            </div>
+            <div className="metric metric-cart">
+              <span className="metric-label">Pedido en preparación</span>
+              <strong>{unidadesPedido} <small>unid.</small></strong>
+              <span className="metric-note">{formatCurrency(totalPedido)} estimado</span>
+            </div>
+          </section>
 
-                  <div className="slots-grid">
-                    {cancha.franjas.map((franja) => {
-                      const isLibre = franja.estado === 'LIBRE';
-                      const slotClass =
-                        franja.estado === 'LIBRE'
-                          ? 'slot-libre'
-                          : franja.estado === 'MANTENIMIENTO'
-                            ? 'slot-mantenimiento'
-                            : 'slot-ocupado';
+          {error && (
+            <div className="alert alert-error" role="alert">
+              <span>{error}</span>
+              <button type="button" onClick={() => setError(null)} aria-label="Cerrar error">×</button>
+            </div>
+          )}
 
-                      return (
-                        <button
-                          key={franja.horaInicio}
-                          type="button"
-                          className={`slot-btn ${slotClass}`}
-                          disabled={!isLibre}
-                          onClick={() => abrirModalReserva(cancha, franja)}
-                        >
-                          {franja.horaInicio} - {franja.horaFin}
-                          <br />
-                          <small>{franja.estado}</small>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </article>
-              ))}
+          {pedidoCreado && (
+            <section className="order-success" aria-live="polite">
+              <div className="success-check" aria-hidden="true">✓</div>
+              <div className="success-copy">
+                <strong>Pedido registrado</strong>
+                <span>{pedidoCreado.codigoOrden} · Estado {pedidoCreado.estado} · {formatCurrency(pedidoCreado.totalNeto)}</span>
+              </div>
+              <button type="button" onClick={() => setPedidoCreado(null)} aria-label="Cerrar confirmación">×</button>
             </section>
           )}
-        </>
-      )}
 
-      {/* Modal de Confirmación de Reserva */}
-      {slotSeleccionado && (
-        <div className="modal-backdrop" role="dialog" aria-modal="true">
-          <div className="modal">
-            <h2>Confirmar Reserva</h2>
-            <p>{slotSeleccionado.cancha.nombre}</p>
-
-            {errorState && errorState.status === 422 && (
-              <div className="alert alert-422" style={{ marginTop: '0.75rem' }}>
-                <span>{errorState.message}</span>
+          <div className="workspace-grid">
+            <section className="inventory-section" id="inventario">
+              <div className="section-heading">
+                <div>
+                  <h2>Productos</h2>
+                  <p>{productosFiltrados.length} referencias en vista</p>
+                </div>
+                <div className="filters">
+                  <label className="search-box" htmlFor="product-search">
+                    <span aria-hidden="true">⌕</span>
+                    <input
+                      id="product-search"
+                      type="search"
+                      placeholder="Buscar por nombre o SKU"
+                      value={busqueda}
+                      onChange={(event) => setBusqueda(event.target.value)}
+                    />
+                  </label>
+                  <select
+                    aria-label="Filtrar por estado del stock"
+                    value={filtroStock}
+                    onChange={(event) => setFiltroStock(event.target.value as StockFilter)}
+                  >
+                    <option value="todos">Todo el stock</option>
+                    <option value="disponibles">Disponible</option>
+                    <option value="criticos">Crítico</option>
+                    <option value="agotados">Agotado</option>
+                  </select>
+                </div>
               </div>
-            )}
 
-            <div className="field" style={{ marginTop: '1rem' }}>
-              <label htmlFor="duracion-select">Duración (horas)</label>
-              <select
-                id="duracion-select"
-                value={duracionHoras}
-                disabled={isSubmitting}
-                onChange={(e) => setDuracionHoras(Number(e.target.value) as 1 | 2)}
-              >
-                <option value={1}>1 hora</option>
-                <option value={2}>2 horas</option>
-              </select>
-            </div>
+              {cargando ? (
+                <div className="product-list" aria-label="Cargando inventario">
+                  {[1, 2, 3].map((item) => <div className="product-skeleton" key={item} />)}
+                </div>
+              ) : productosFiltrados.length === 0 ? (
+                <div className="empty-state">
+                  <span className="empty-symbol" aria-hidden="true">∅</span>
+                  <strong>{productos.length === 0 ? 'No hay productos registrados' : 'No encontramos productos'}</strong>
+                  <p>{productos.length === 0 ? 'Comprueba que el backend esté disponible y tenga productos en el catálogo.' : 'Prueba con otro término o filtro.'}</p>
+                  {productos.length === 0 && <button type="button" className="text-button" onClick={() => void cargarProductos()}>Reintentar</button>}
+                </div>
+              ) : (
+                <div className="product-list">
+                  {productosFiltrados.map((producto) => {
+                    const cantidad = cantidades[producto.id] ?? 0;
+                    const agotado = producto.stockActual < 1;
+                    return (
+                      <article className="product-row" key={producto.id}>
+                        <div className="product-avatar" aria-hidden="true">{producto.nombreProducto.slice(0, 1).toLocaleUpperCase('es')}</div>
+                        <div className="product-info">
+                          <h3>{producto.nombreProducto}</h3>
+                          <span className="product-sku">{producto.sku}</span>
+                        </div>
+                        <div className="product-stock">
+                          <span className="stock-number">{producto.stockActual}</span>
+                          <span className="stock-unit">en existencia</span>
+                        </div>
+                        <span className={`stock-badge ${stockTone(producto.estado)}`}>
+                          <span className="badge-dot" />{producto.estado}
+                        </span>
+                        <div className="product-price">{formatCurrency(producto.precioUnitario)}</div>
+                        <div className="quantity-control" aria-label={`Cantidad de ${producto.nombreProducto}`}>
+                          <button type="button" onClick={() => cambiarCantidad(producto, cantidad - 1)} disabled={cantidad === 0} aria-label={`Quitar una unidad de ${producto.nombreProducto}`}>−</button>
+                          <output>{cantidad}</output>
+                          <button type="button" onClick={() => cambiarCantidad(producto, cantidad + 1)} disabled={agotado || cantidad >= producto.stockActual} aria-label={`Agregar una unidad de ${producto.nombreProducto}`}>+</button>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
 
-            <div className="summary-box">
-              <div className="summary-row">
-                <span>Inicio (UTC):</span>
-                <strong>
-                  {fecha} {slotSeleccionado.franja.horaInicio}
-                </strong>
+            <aside className="order-panel" id="pedido">
+              <div className="order-panel-heading">
+                <div>
+                  <p className="eyebrow">VENTA</p>
+                  <h2>Nuevo pedido</h2>
+                </div>
+                <span className="order-count">{lineasPedido.length}</span>
               </div>
-              <div className="summary-row">
-                <span>Valor total:</span>
-                <strong>{formatCurrency(calculosModal.valorTotal)}</strong>
+              {lineasPedido.length === 0 ? (
+                <div className="cart-empty">
+                  <span aria-hidden="true">＋</span>
+                  <p>Selecciona productos del inventario para armar el pedido.</p>
+                </div>
+              ) : (
+                <div className="cart-lines">
+                  {lineasPedido.map(({ producto, cantidad }) => (
+                    <div className="cart-line" key={producto.id}>
+                      <div>
+                        <strong>{producto.nombreProducto}</strong>
+                        <span>{cantidad} × {formatCurrency(producto.precioUnitario)}</span>
+                      </div>
+                      <b>{formatCurrency(cantidad * producto.precioUnitario)}</b>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="order-total">
+                <span>Total neto</span>
+                <strong>{formatCurrency(totalPedido)}</strong>
               </div>
-              <div className="summary-row highlight">
-                <span>Anticipo 50% (RN-09):</span>
-                <strong>{formatCurrency(calculosModal.valorAnticipo)}</strong>
-              </div>
-            </div>
-
-            <div className="modal-actions">
               <button
                 type="button"
-                className="btn btn-secondary"
-                disabled={isSubmitting}
-                onClick={() => setSlotSeleccionado(null)}
+                className="submit-order"
+                disabled={lineasPedido.length === 0 || enviando || cargando}
+                onClick={() => void confirmarPedido()}
               >
-                Cancelar
+                {enviando ? 'Registrando pedido…' : 'Crear pedido'}
+                {!enviando && <span aria-hidden="true">→</span>}
               </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                disabled={isSubmitting}
-                onClick={() => void handleConfirmarReserva()}
-              >
-                {isSubmitting ? 'Procesando...' : 'Confirmar Reserva'}
-              </button>
-            </div>
+              <p className="order-footnote">El stock se valida y descuenta al confirmar.</p>
+            </aside>
           </div>
+          <footer className="page-footer">GIRC · Gestión Integral de Recursos y Comercialización</footer>
         </div>
-      )}
+      </main>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-name: CourtSync Pro CI
+name: GIRC CI
 
 on:
   push:

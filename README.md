@@ -1,64 +1,84 @@
-# CourtSync Pro — MVP (Spec-Driven Development)
+# GIRC
 
-MVP funcional del **Sistema de Reserva de Canchas Deportivas** construido bajo el enfoque **Spec-Driven Development** (Hito 1 y Hito 2) con **Java 21 + Spring Boot 3.4**, **PostgreSQL 16**, **React 18 + Vite + TypeScript**, **Docker** y **GitHub Actions**.
+**Sistema de Gestión Integral de Recursos y Comercialización**
 
-## Alcance del MVP
-- **`HU-01` Consultar Disponibilidad:** `GET /api/v1/canchas/disponibilidad?fecha=YYYY-MM-DD&tipoCancha=PADEL` (franjas de 1h entre `08:00` y `22:00` UTC; rechaza fechas pasadas con HTTP `400`).
-- **`HU-02` Crear Reserva:** `POST /api/v1/reservas`
-  - **`RN-01`:** Máximo 2 reservas activas por jugador en la misma fecha (`422`).
-  - **`RN-02`:** Mínimo 2 horas de anticipación (`422`).
-  - **`RN-03`:** Estado inicial `PENDIENTE_PAGO` con expiración de 10 minutos.
-  - **`RN-09`:** `valorTotal = tarifaHora * duracionHoras` y `valorAnticipo = 50%`.
-  - **`RNF-02`:** Bloqueo pesimista (`@Lock(LockModeType.PESSIMISTIC_WRITE)`) sobre `Cancha` (`409 CONFLICT_HORARIO_OCUPADO`).
-  - **`RNF-04`:** Evento `ReservaCreadaEvent` procesado con `@Async` y `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`.
+GIRC permite consultar el inventario, revisar niveles de stock y registrar pedidos de varios productos desde una consola web. El backend calcula el total neto, valida disponibilidad bajo bloqueo transaccional, descuenta existencias y publica un evento de pedido creado.
 
----
+## Tecnologías
 
-## 1. Ejecutar pruebas automatizadas
+- Java 21 y Spring Boot 3.4
+- Spring Data JPA y PostgreSQL 16
+- React 18, TypeScript y Vite
+- JUnit 5, Mockito, MockMvc y H2
+- Docker Compose
 
-### Backend (JUnit 5 + Mockito + MockMvc)
-```bash
+## Funcionalidad actual
+
+- `GET /api/v1/productos`: listado de productos con SKU, precio, existencias, mínimo y estado.
+- `POST /api/v1/pedidos`: crea pedidos con uno o más productos.
+- Reglas de inventario: no permite solicitar más unidades que las disponibles; actualiza el producto a `Disponible`, `Crítico` o `Agotado`.
+- Idempotencia: rechaza una clave reutilizada con HTTP 409.
+- Errores estandarizados en `ErrorResponse`: 400 para validaciones, 404 para producto ausente y 422 para stock insuficiente.
+- La interfaz permite buscar por nombre/SKU, filtrar por estado, armar el pedido y ver su confirmación.
+
+## Ejecutar localmente
+
+### Backend
+
+Configura PostgreSQL y las variables de entorno antes de iniciar la aplicación:
+
+```powershell
+$env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/girc_db"
+$env:SPRING_DATASOURCE_USERNAME = "girc"
+$env:SPRING_DATASOURCE_PASSWORD = "<tu contraseña local>"
 cd backend
+mvn spring-boot:run
+```
+
+La aplicación publica su API en `http://localhost:8080`.
+
+### Frontend
+
+En otra terminal:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+Abre la dirección que Vite indique, normalmente `http://localhost:5173`. Vite reenvía `/api/v1` al backend local.
+
+## Ejecutar pruebas
+
+Desde `backend`:
+
+```powershell
 mvn test
 ```
 
-### Frontend (TypeScript + Vite Build)
-```bash
-cd frontend
+Desde `frontend`:
+
+```powershell
 npm ci
 npm run build
 ```
 
----
+## Docker Compose
 
-## 2. Levantar todo el stack con Docker
+Copia `.env.example` a `.env`, cambia `DB_PASSWORD` por una contraseña local propia y levanta los servicios:
 
-```bash
-cp .env.example .env
+```powershell
+Copy-Item .env.example .env
 docker compose up --build -d
 ```
 
-- **Frontend (Nginx):** http://localhost
-- **Backend Healthcheck:** http://localhost:8080/actuator/health
-- **PostgreSQL:** `localhost:5432`
+- Interfaz: `http://localhost`
+- API: `http://localhost:8080/api/v1`
+- PostgreSQL: `localhost:5432`
 
----
+El archivo `.env` está excluido de Git. No uses las credenciales de ejemplo en un entorno publicado.
 
-## 3. Probar endpoints rápidamente (`curl`)
+## Estructura
 
-### Consultar disponibilidad (`HU-01`)
-```bash
-curl "http://localhost:8080/api/v1/canchas/disponibilidad?fecha=2026-11-25&tipoCancha=PADEL"
-```
-
-### Crear reserva (`HU-02`)
-```bash
-curl -X POST "http://localhost:8080/api/v1/reservas" \
-  -H "Content-Type: application/json" \
-  -H "X-Usuario-Id: 1" \
-  -d '{
-    "canchaId": 1,
-    "fechaHoraInicio": "2026-11-25T19:00:00Z",
-    "duracionHoras": 1
-  }'
-```
+El backend conserva la estructura de paquetes entregada en la plantilla del curso y organiza el código por `controller`, `domain.entity`, `dto`, `exception`, `repository` y `service`. Los módulos de producto y pedido implementan el flujo GIRC; la pantalla principal está orientada a inventario y comercialización.
