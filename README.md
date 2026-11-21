@@ -82,6 +82,7 @@ El archivo `.env` está excluido de Git. No uses las credenciales de ejemplo en 
 ## Arquitectura y diseño — Parcial 2
 
 - [Documento Maestro GIRC](docs/hito-2/Documento-Maestro-Parcial-2.md)
+- [Documento consolidado PDF](docs/hito-2/Documento-Maestro-Parcial-2.pdf) · [Word](docs/hito-2/Documento-Maestro-Parcial-2.docx)
 - [Diagramas C4 y UML renderizados](docs/hito-2/diagramas.md)
 - [Diccionario de datos y mapeo JPA](docs/hito-2/persistencia/diccionario-datos.md)
 - [ADRs](docs/hito-2/adr/README.md)

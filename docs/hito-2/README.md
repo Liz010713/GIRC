@@ -3,6 +3,8 @@
 ## Entrega
 
 - [Documento Maestro del Parcial 2](Documento-Maestro-Parcial-2.md): justificación, C4/UML, diccionario, SOLID/patrones, ADRs, pruebas y guía de exposición.
+- [Documento consolidado Word](Documento-Maestro-Parcial-2.docx)
+- [Documento consolidado PDF](Documento-Maestro-Parcial-2.pdf)
 - [Diagramas renderizados](diagramas.md): vista Mermaid en GitHub.
 - [`diagrams/`](diagrams/): fuentes Mermaid independientes y editables.
 - [`persistencia/diccionario-datos.md`](persistencia/diccionario-datos.md): columnas SQL, restricciones, relaciones e índices.

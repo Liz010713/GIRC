@@ -12,7 +12,7 @@ flowchart LR
   browser -->|HTTP local :5173 / HTTP :80| proxy
   proxy -->|HTTP /api/v1| api
   api -->|JDBC| db
-  api -->|publishEvent(PedidoCreadoEvent)<br/>sin subscriber GIRC actualmente| event
+  api -->|"publishEvent(PedidoCreadoEvent)<br/>sin subscriber GIRC actualmente"| event
 
   note["Producción recomendada, no configurada:<br/>TLS termina en proxy con certificado; restringir DB a red privada;<br/>secretos mediante gestor de secretos; backups/observabilidad"]
   note -.-> proxy

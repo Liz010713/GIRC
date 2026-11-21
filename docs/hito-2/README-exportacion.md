@@ -1,13 +1,35 @@
-# Exportar la entrega a PDF o Word
+# Exportar la entrega a PDF y Word
 
-El Documento Maestro y los diagramas son fuentes Markdown con Mermaid versionadas en GitHub.
+El Documento Maestro tiene fuentes Markdown/Mermaid. El script `exportar-entrega.ps1` renderiza las seis fuentes Mermaid a PNG y SVG, integra el Documento Maestro, el diccionario, trazabilidad RNF, evidencia SOLID y ADRs, y genera DOCX y PDF.
 
-## Exportación sencilla a PDF
+## Requisitos en Windows
 
-1. Abre `Documento-Maestro-Parcial-2.md` en VS Code.
-2. Abre la vista previa Markdown y confirma que se muestran títulos, tablas y enlaces.
-3. Abre `diagramas.md` en GitHub o en la vista previa de VS Code para renderizar Mermaid.
-4. Usa la opción de impresión del navegador/editor para guardar la vista como PDF. Si el docente pide un único PDF con los diagramas dentro, copia los diagramas renderizados al documento antes de imprimir.
-5. Sustituye los campos `[Completar]` de la portada y verifica que los nombres del equipo sean los correctos.
+- Python 3
+- Node.js/npm y acceso a npm para Mermaid CLI
+- Google Chrome
+- Pandoc (se instala como binario Python)
 
-Los archivos Markdown y `.mmd` son los anexos técnicos fuente; el PDF/Word exportado debe conservarse como artefacto de entrega del equipo.
+## Instalar Pandoc
+
+```powershell
+python -m pip install --user pypandoc-binary
+```
+
+## Generar los entregables
+
+Desde PowerShell:
+
+```powershell
+Set-Location "<ruta-del-proyecto>\docs\hito-2"
+.\exportar-entrega.ps1
+```
+
+El script escribe:
+
+- `Documento-Maestro-Parcial-2.docx`
+- `Documento-Maestro-Parcial-2.pdf`
+- `Documento-Maestro-Consolidado.md`
+- `Documento-Maestro-Consolidado.html` (vista intermedia para impresión)
+- Figuras `.png` y `.svg` en `rendered/`
+
+La portada contiene campos `[Completar]`; revisa integrantes, curso, docente e institución antes de entregar. Regenera los documentos después de editar Markdown o diagramas.

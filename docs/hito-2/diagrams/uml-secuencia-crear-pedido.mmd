@@ -20,45 +20,49 @@ sequenceDiagram
     Valid-->>Controller: MethodArgumentNotValidException
     Controller->>Advice: Manejo centralizado
     Advice-->>Proxy: 400 ErrorResponse
-    Proxy-->>UI: 400 JSON
+    Proxy-->>UI: 400 JSON sin invocar servicio
   else Request válido
-    Valid-->>Controller: Request validado
-    Controller->>Service: crearPedido(request)
-    Service->>PedidoRepo: existsByClaveIdempotencia(clave)
-    PedidoRepo->>DB: SELECT EXISTS
-    DB-->>PedidoRepo: existe / no existe
-    alt Clave idempotente repetida
-      PedidoRepo-->>Service: true
-      Service-->>Advice: ConflictoNegocioException
-      Advice-->>Proxy: 409 ErrorResponse
-      Proxy-->>UI: 409 JSON
-    else Clave nueva
-      loop Por cada producto solicitado
-        Service->>ProductoRepo: findByIdWithLock(id) [PESSIMISTIC_WRITE]
-        ProductoRepo->>DB: SELECT ... FOR UPDATE
-        DB-->>ProductoRepo: Producto bloqueado
-        ProductoRepo-->>Service: Producto
-      end
-      alt Algún producto no existe
-        Service-->>Advice: RecursoNoEncontradoException
-        Advice-->>Proxy: 404 ErrorResponse
-        Proxy-->>UI: 404 JSON
-      else Stock de algún ítem insuficiente
-        Service-->>Advice: StockInsuficienteException
-        Advice-->>Proxy: 422 ErrorResponse
-        Proxy-->>UI: 422 JSON
-        Note over Service,DB: @Transactional revierte; no guarda pedido ni evento.
-      else Stock válido para todos los ítems
-        Service->>Service: Calcula subtotales/total y estados de stock
-        Service->>PedidoRepo: save(Pedido + detalles)
-        PedidoRepo->>DB: INSERT pedido y detalles; flush/commit transaccional
-        DB-->>PedidoRepo: Pedido persistido
-        PedidoRepo-->>Service: Pedido guardado
-        Service->>Events: publishEvent(PedidoCreadoEvent)
-        Note over Events: No existe listener GIRC de PedidoCreadoEvent en la implementación actual.
-        Service-->>Controller: Pedido
-        Controller-->>Proxy: 201 Created + JSON
-        Proxy-->>UI: 201 JSON
-      end
-    end
+    Valid-->>Controller: DTO válido
+  end
+  Controller->>Service: crearPedido(request)
+  Service->>PedidoRepo: existsByClaveIdempotencia(clave)
+  PedidoRepo->>DB: SELECT EXISTS
+  DB-->>PedidoRepo: existe / no existe
+  alt Clave repetida
+    PedidoRepo-->>Service: true
+    Service-->>Advice: ConflictoNegocioException
+    Advice-->>Proxy: 409 ErrorResponse sin guardar ni publicar
+    Proxy-->>UI: 409 JSON
+  else Clave nueva
+    PedidoRepo-->>Service: false
+  end
+  loop Por cada producto solicitado
+    Service->>ProductoRepo: findByIdWithLock(id) [PESSIMISTIC_WRITE]
+    ProductoRepo->>DB: SELECT ... FOR UPDATE
+    DB-->>ProductoRepo: Producto o ausencia
+    ProductoRepo-->>Service: Resultado de búsqueda
+  end
+  alt Producto inexistente
+    Service-->>Advice: RecursoNoEncontradoException
+    Advice-->>Proxy: 404 ErrorResponse
+    Proxy-->>UI: 404 JSON
+  else Productos encontrados
+    Service->>Service: Continúa validación de stock
+  end
+  alt Stock insuficiente
+    Service-->>Advice: StockInsuficienteException
+    Advice-->>Proxy: 422 ErrorResponse
+    Proxy-->>UI: 422 JSON
+    Note over Service,DB: @Transactional revierte y no guarda pedido ni publica evento.
+  else Stock suficiente
+    Service->>Service: Calcula subtotales, total y estado de stock
+    Service->>PedidoRepo: save(Pedido + detalles)
+    PedidoRepo->>DB: INSERT pedido y detalles y commit transaccional
+    DB-->>PedidoRepo: Pedido persistido
+    PedidoRepo-->>Service: Pedido guardado
+    Service->>Events: publishEvent(PedidoCreadoEvent)
+    Note over Events: No existe listener GIRC de PedidoCreadoEvent actualmente.
+    Service-->>Controller: Pedido
+    Controller-->>Proxy: 201 Created + JSON
+    Proxy-->>UI: 201 JSON
   end

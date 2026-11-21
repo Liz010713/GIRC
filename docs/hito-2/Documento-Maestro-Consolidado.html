@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>GIRC - Documento Maestro Parcial 2</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="C:\Users\Lizett\Downloads\courtsync-pro-mvp-main\courtsync-pro-mvp-main\docs\hito-2\exportacion.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">GIRC - Documento Maestro Parcial 2</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#documento-maestro-parcial-2"
+id="toc-documento-maestro-parcial-2">Documento Maestro — Parcial 2</a>
+<ul>
+<li><a href="#girc" id="toc-girc">GIRC</a>
+<ul>
+<li><a
+href="#sistema-de-gestión-integral-de-recursos-y-comercialización"
+id="toc-sistema-de-gestión-integral-de-recursos-y-comercialización">Sistema
+de Gestión Integral de Recursos y Comercialización</a></li>
+</ul></li>
+<li><a href="#resumen-ejecutivo" id="toc-resumen-ejecutivo">1. Resumen
+ejecutivo</a></li>
+<li><a href="#alcance-actual-y-evidencia"
+id="toc-alcance-actual-y-evidencia">2. Alcance actual y
+evidencia</a></li>
+<li><a href="#justificación-del-estilo-arquitectónico"
+id="toc-justificación-del-estilo-arquitectónico">3. Justificación del
+estilo arquitectónico</a>
+<ul>
+<li><a href="#estilo-seleccionado-monolito-modular-en-capas"
+id="toc-estilo-seleccionado-monolito-modular-en-capas">Estilo
+seleccionado: monolito modular en capas</a></li>
+<li><a href="#relación-con-atributos-de-calidad"
+id="toc-relación-con-atributos-de-calidad">Relación con atributos de
+calidad</a></li>
+</ul></li>
+<li><a href="#modelo-c4" id="toc-modelo-c4">4. Modelo C4</a>
+<ul>
+<li><a href="#nivel-1-contexto" id="toc-nivel-1-contexto">Nivel 1 —
+Contexto</a></li>
+<li><a href="#nivel-2-contenedores" id="toc-nivel-2-contenedores">Nivel
+2 — Contenedores</a></li>
+<li><a href="#nivel-3-componentes-del-backend"
+id="toc-nivel-3-componentes-del-backend">Nivel 3 — Componentes del
+backend</a></li>
+</ul></li>
+<li><a href="#uml-esencial" id="toc-uml-esencial">5. UML esencial</a>
+<ul>
+<li><a href="#clases-de-dominio" id="toc-clases-de-dominio">Clases de
+dominio</a></li>
+<li><a href="#secuencia-full-stack-de-crear-pedido"
+id="toc-secuencia-full-stack-de-crear-pedido">Secuencia Full Stack de
+crear pedido</a></li>
+<li><a href="#despliegue" id="toc-despliegue">Despliegue</a></li>
+</ul></li>
+<li><a href="#persistencia-y-orm" id="toc-persistencia-y-orm">6.
+Persistencia y ORM</a></li>
+<li><a href="#diseño-limpio-y-patrones"
+id="toc-diseño-limpio-y-patrones">7. Diseño limpio y patrones</a>
+<ul>
+<li><a href="#responsabilidadessolid-observables"
+id="toc-responsabilidadessolid-observables">Responsabilidades/SOLID
+observables</a></li>
+<li><a
+href="#brechas-recomendadas-antes-de-llamarlo-listo-para-producción"
+id="toc-brechas-recomendadas-antes-de-llamarlo-listo-para-producción">Brechas
+recomendadas antes de llamarlo listo para producción</a></li>
+</ul></li>
+<li><a href="#registros-de-decisiones-adrs"
+id="toc-registros-de-decisiones-adrs">8. Registros de decisiones
+(ADRs)</a></li>
+<li><a href="#pruebas-y-evidencia" id="toc-pruebas-y-evidencia">9.
+Pruebas y evidencia</a></li>
+<li><a href="#cómo-presentar-el-trabajo-paso-a-paso"
+id="toc-cómo-presentar-el-trabajo-paso-a-paso">10. Cómo presentar el
+trabajo, paso a paso</a></li>
+<li><a href="#lista-de-entrega-del-equipo"
+id="toc-lista-de-entrega-del-equipo">11. Lista de entrega del
+equipo</a></li>
+</ul></li>
+<li><a href="#anexo-a---diagramas-renderizados"
+id="toc-anexo-a---diagramas-renderizados">Anexo A - Diagramas
+renderizados</a>
+<ul>
+<li><a href="#c4-level-1---context" id="toc-c4-level-1---context">C4
+Level 1 - Context</a></li>
+<li><a href="#c4-level-2---containers"
+id="toc-c4-level-2---containers">C4 Level 2 - Containers</a></li>
+<li><a href="#c4-level-3---backend-components"
+id="toc-c4-level-3---backend-components">C4 Level 3 - Backend
+components</a></li>
+<li><a href="#uml---domain-classes" id="toc-uml---domain-classes">UML -
+Domain classes</a></li>
+<li><a href="#uml---full-stack-order-sequence"
+id="toc-uml---full-stack-order-sequence">UML - Full Stack order
+sequence</a></li>
+<li><a href="#uml---deployment" id="toc-uml---deployment">UML -
+Deployment</a></li>
+</ul></li>
+<li><a href="#anexo-b---diccionario-de-datos"
+id="toc-anexo-b---diccionario-de-datos">Anexo B - Diccionario de
+datos</a></li>
+<li><a href="#diccionario-de-datos-y-mapeo-jpa"
+id="toc-diccionario-de-datos-y-mapeo-jpa">Diccionario de datos y mapeo
+JPA</a>
+<ul>
+<li><a href="#tablas-girc-inventario-y-pedidos"
+id="toc-tablas-girc-inventario-y-pedidos">Tablas GIRC: inventario y
+pedidos</a>
+<ul>
+<li><a href="#productos"
+id="toc-productos"><code>productos</code></a></li>
+<li><a href="#pedidos" id="toc-pedidos"><code>pedidos</code></a></li>
+<li><a href="#detalles_pedido"
+id="toc-detalles_pedido"><code>detalles_pedido</code></a></li>
+</ul></li>
+<li><a href="#entidades-heredadas-de-reservas"
+id="toc-entidades-heredadas-de-reservas">Entidades heredadas de
+reservas</a>
+<ul>
+<li><a href="#jugadores"
+id="toc-jugadores"><code>jugadores</code></a></li>
+<li><a href="#canchas" id="toc-canchas"><code>canchas</code></a></li>
+<li><a href="#reservas" id="toc-reservas"><code>reservas</code></a></li>
+</ul></li>
+<li><a href="#integridad-y-notas-para-producción"
+id="toc-integridad-y-notas-para-producción">Integridad y notas para
+producción</a></li>
+</ul></li>
+<li><a href="#anexo-c---trazabilidad-rnf"
+id="toc-anexo-c---trazabilidad-rnf">Anexo C - Trazabilidad RNF</a></li>
+<li><a href="#trazabilidad-de-requisitos-no-funcionales"
+id="toc-trazabilidad-de-requisitos-no-funcionales">Trazabilidad de
+requisitos no funcionales</a></li>
+<li><a href="#anexo-d---evidencia-solid-y-patrones"
+id="toc-anexo-d---evidencia-solid-y-patrones">Anexo D - Evidencia SOLID
+y patrones</a></li>
+<li><a href="#evidencia-de-diseño-limpio-solid-y-patrones"
+id="toc-evidencia-de-diseño-limpio-solid-y-patrones">Evidencia de diseño
+limpio, SOLID y patrones</a>
+<ul>
+<li><a href="#mejora-concreta-priorizada"
+id="toc-mejora-concreta-priorizada">Mejora concreta priorizada</a></li>
+</ul></li>
+<li><a href="#anexo-e---adrs" id="toc-anexo-e---adrs">Anexo E -
+ADRs</a></li>
+<li><a href="#adr-001-monolito-modular-con-arquitectura-en-capas"
+id="toc-adr-001-monolito-modular-con-arquitectura-en-capas">ADR-001:
+Monolito modular con arquitectura en capas</a>
+<ul>
+<li><a href="#contexto-y-problema" id="toc-contexto-y-problema">Contexto
+y problema</a></li>
+<li><a href="#alternativas-evaluadas"
+id="toc-alternativas-evaluadas">Alternativas evaluadas</a></li>
+<li><a href="#decisión-tomada" id="toc-decisión-tomada">Decisión
+tomada</a></li>
+<li><a href="#consecuencias-y-trade-offs"
+id="toc-consecuencias-y-trade-offs">Consecuencias y trade-offs</a></li>
+</ul></li>
+<li><a href="#adr-002-transacciones-y-bloqueo-pesimista-de-existencias"
+id="toc-adr-002-transacciones-y-bloqueo-pesimista-de-existencias">ADR-002:
+Transacciones y bloqueo pesimista de existencias</a>
+<ul>
+<li><a href="#contexto-y-problema-1"
+id="toc-contexto-y-problema-1">Contexto y problema</a></li>
+<li><a href="#alternativas-evaluadas-1"
+id="toc-alternativas-evaluadas-1">Alternativas evaluadas</a></li>
+<li><a href="#decisión-tomada-1" id="toc-decisión-tomada-1">Decisión
+tomada</a></li>
+<li><a href="#consecuencias-y-trade-offs-1"
+id="toc-consecuencias-y-trade-offs-1">Consecuencias y
+trade-offs</a></li>
+</ul></li>
+<li><a href="#adr-003-postgresql-y-spring-data-jpa"
+id="toc-adr-003-postgresql-y-spring-data-jpa">ADR-003: PostgreSQL y
+Spring Data JPA</a>
+<ul>
+<li><a href="#contexto-y-problema-2"
+id="toc-contexto-y-problema-2">Contexto y problema</a></li>
+<li><a href="#alternativas-evaluadas-2"
+id="toc-alternativas-evaluadas-2">Alternativas evaluadas</a></li>
+<li><a href="#decisión-tomada-2" id="toc-decisión-tomada-2">Decisión
+tomada</a></li>
+<li><a href="#consecuencias-y-trade-offs-2"
+id="toc-consecuencias-y-trade-offs-2">Consecuencias y
+trade-offs</a></li>
+</ul></li>
+<li><a href="#adr-004-autenticación-y-autorización-de-operadores"
+id="toc-adr-004-autenticación-y-autorización-de-operadores">ADR-004:
+Autenticación y autorización de operadores</a>
+<ul>
+<li><a href="#contexto-y-problema-3"
+id="toc-contexto-y-problema-3">Contexto y problema</a></li>
+<li><a href="#alternativas-evaluadas-3"
+id="toc-alternativas-evaluadas-3">Alternativas evaluadas</a></li>
+<li><a href="#decisión-tomada-3" id="toc-decisión-tomada-3">Decisión
+tomada</a></li>
+<li><a href="#consecuencias-y-trade-offs-3"
+id="toc-consecuencias-y-trade-offs-3">Consecuencias y
+trade-offs</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="documento-maestro-parcial-2">Documento Maestro — Parcial 2</h1>
+<h2 id="girc">GIRC</h2>
+<h3
+id="sistema-de-gestión-integral-de-recursos-y-comercialización">Sistema
+de Gestión Integral de Recursos y Comercialización</h3>
+<p><strong>Asignatura:</strong> [Completar]<br>
+<strong>Docente:</strong> [Completar]<br> <strong>Integrantes:</strong>
+[Completar nombres del equipo]<br> <strong>Institución:</strong>
+[Completar]<br> <strong>Fecha:</strong> 21 de noviembre de 2026<br>
+<strong>Repositorio:</strong> <a
+href="https://github.com/Liz010713/GIRC">Liz010713/GIRC</a></p>
+<blockquote>
+<p>Este documento describe la implementación y la arquitectura
+verificadas en el repositorio. Los elementos marcados como
+<em>propuestos</em>, <em>brecha</em> o <em>no implementados</em> no
+deben presentarse como funcionalidad existente.</p>
+</blockquote>
+<h2 id="resumen-ejecutivo">1. Resumen ejecutivo</h2>
+<p>GIRC es una aplicación web para consultar inventario y registrar
+pedidos. La SPA React consulta productos desde Spring Boot, permite
+seleccionar artículos y enviar un pedido. El backend valida
+idempotencia, bloquea filas de productos, comprueba existencias, calcula
+subtotales y total, actualiza el estado del stock, persiste
+pedido/detalles y publica un evento de aplicación.</p>
+<p>El estilo adoptado es <strong>monolito modular con arquitectura en
+capas</strong>. El repositorio conserva clases de reservas del proyecto
+formativo original como módulo heredado; la interfaz principal y la
+identidad visible ahora corresponden a GIRC.</p>
+<h2 id="alcance-actual-y-evidencia">2. Alcance actual y evidencia</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capacidad</th>
+<th>Evidencia actual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consultar inventario</td>
+<td><code>GET /api/v1/productos</code>, <code>ProductoController</code>,
+<code>ProductoRepository.findAll()</code></td>
+</tr>
+<tr>
+<td>Crear pedido</td>
+<td><code>POST /api/v1/pedidos</code>, <code>PedidoController</code>,
+<code>PedidoServiceImpl</code></td>
+</tr>
+<tr>
+<td>Validación de entrada</td>
+<td><code>CrearPedidoRequest</code> con <code>@NotNull</code>,
+<code>@NotBlank</code>, <code>@NotEmpty</code>, <code>@Valid</code>,
+<code>@Min(1)</code></td>
+</tr>
+<tr>
+<td>Idempotencia</td>
+<td><code>PedidoRepository.existsByClaveIdempotencia()</code> y UNIQUE
+en columna</td>
+</tr>
+<tr>
+<td>Concurrencia de stock</td>
+<td><code>@Transactional</code> y <code>findByIdWithLock()</code> con
+<code>PESSIMISTIC_WRITE</code></td>
+</tr>
+<tr>
+<td>Errores HTTP</td>
+<td><code>GlobalExceptionHandler</code>: 400, 404, 409 y 422</td>
+</tr>
+<tr>
+<td>Eventos</td>
+<td>Se publica <code>PedidoCreadoEvent</code>; aún no existe listener de
+pedido</td>
+</tr>
+<tr>
+<td>Notificaciones</td>
+<td>El listener heredado de reservas solo escribe log; no hay SMTP
+real</td>
+</tr>
+<tr>
+<td>Seguridad</td>
+<td>No hay autenticación/autorización implementada; no desplegar API
+abierta</td>
+</tr>
+<tr>
+<td>Integraciones de pago</td>
+<td>No forman parte del flujo actual de GIRC</td>
+</tr>
+</tbody>
+</table>
+<h2 id="justificación-del-estilo-arquitectónico">3. Justificación del
+estilo arquitectónico</h2>
+<h3 id="estilo-seleccionado-monolito-modular-en-capas">Estilo
+seleccionado: monolito modular en capas</h3>
+<p>El backend es una aplicación Spring Boot única, separada en
+<code>controller</code>, <code>service</code>, <code>repository</code>,
+<code>domain.entity</code>, <code>dto</code> y <code>exception</code>.
+React se despliega como SPA y se comunica con la API mediante HTTP/JSON.
+PostgreSQL es un contenedor separado.</p>
+<p>Se elige este estilo para el alcance formativo porque mantiene una
+transacción atómica para consultar y actualizar stock, simplifica
+pruebas con JUnit/Mockito/MockMvc/H2 y hace explícitas las
+responsabilidades. Microservicios añadirían coordinación de
+transacciones y despliegue sin una necesidad demostrada. Hexagonal/Clean
+sería viable si aumentan integraciones, pero hoy no hay
+puertos/adaptadores definidos.</p>
+<h3 id="relación-con-atributos-de-calidad">Relación con atributos de
+calidad</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Atributo</th>
+<th>Mecanismo actual</th>
+<th>Evidencia / riesgo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Integridad/concurrencia (RNF-02)</td>
+<td><code>@Transactional</code>, bloqueo <code>PESSIMISTIC_WRITE</code>,
+UNIQUE de clave idempotente</td>
+<td>No hay benchmark ni prueba de concurrencia real en PostgreSQL;
+riesgo de contención/deadlock con pedidos multítem</td>
+</tr>
+<tr>
+<td>Rendimiento</td>
+<td>Índices compuestos de reservas; React filtra catálogo en
+cliente</td>
+<td>Catálogo usa <code>findAll()</code> sin paginación; P95 no
+medido</td>
+</tr>
+<tr>
+<td>Seguridad</td>
+<td>Validación de entrada, manejo central de errores, parámetros
+JPA</td>
+<td>No existe SecurityFilterChain, JWT ni control por rol; CORS permite
+<code>*</code></td>
+</tr>
+<tr>
+<td>Mantenibilidad (RNF-05)</td>
+<td>Interfaces de servicio/repository y DTO de entrada</td>
+<td><code>ProductoController</code> accede directo al repository;
+controllers de pedido devuelven entidades JPA</td>
+</tr>
+<tr>
+<td>Resiliencia/eventos</td>
+<td><code>ApplicationEventPublisher</code>; listener de reserva async
+AFTER_COMMIT</td>
+<td><code>PedidoCreadoEvent</code> no tiene consumidor y Spring event en
+memoria no es durable</td>
+</tr>
+<tr>
+<td>Despliegue</td>
+<td>Docker Compose para DB, API y Nginx</td>
+<td>Compose describe entorno local; proxy TLS, backups y monitoreo de
+producción no están configurados</td>
+</tr>
+</tbody>
+</table>
+<h2 id="modelo-c4">4. Modelo C4</h2>
+<p>Los seis diagramas editables están en <a
+href="diagrams/"><code>diagrams/</code></a>. La versión para
+lectura/render en GitHub está en <a href="diagramas.md">Diagramas del
+Parcial 2</a>.</p>
+<h3 id="nivel-1-contexto">Nivel 1 — Contexto</h3>
+<p>Sistema central GIRC, operador comercial/inventario y administrador
+como actores conceptuales. PostgreSQL es dependencia real. SMTP se
+muestra como sistema propuesto/no conectado para GIRC; una pasarela de
+pago se declara fuera del flujo actual. La autenticación de roles no
+está implementada.</p>
+<p>Fuente: <a
+href="diagrams/c4-contexto.mmd"><code>c4-contexto.mmd</code></a>.</p>
+<h3 id="nivel-2-contenedores">Nivel 2 — Contenedores</h3>
+<p>Navegador con React/TypeScript, Nginx como servidor SPA/proxy, API
+Java 21/Spring Boot y PostgreSQL 16. Comunicación local HTTP, API JSON y
+JDBC. La sección de producción del dibujo se etiqueta expresamente como
+recomendación, no como despliegue existente.</p>
+<p>Fuente: <a
+href="diagrams/c4-contenedores.mmd"><code>c4-contenedores.mmd</code></a>.</p>
+<h3 id="nivel-3-componentes-del-backend">Nivel 3 — Componentes del
+backend</h3>
+<p>Se muestran controllers, DTO, service, repositories, entidades,
+manejo global de errores y evento de aplicación. No se dibuja un filtro
+JWT como existente: se marca como brecha. También se hace visible que
+<code>ProductoController</code> consulta el repository directamente.</p>
+<p>Fuente: <a
+href="diagrams/c4-componentes-backend.mmd"><code>c4-componentes-backend.mmd</code></a>.</p>
+<h2 id="uml-esencial">5. UML esencial</h2>
+<h3 id="clases-de-dominio">Clases de dominio</h3>
+<p>El diagrama cubre entidades GIRC y las entidades de reservas que
+permanecen en la plantilla. Cardinalidades reales:
+<code>Pedido 1 — 0..N DetallePedido</code>,
+<code>DetallePedido N — 1 Producto</code>,
+<code>Reserva N — 1 Cancha</code>.
+<code>idUsuario</code>/<code>usuarioId</code> son escalares sin FK a
+<code>Jugador</code>. <code>Pedido.estado</code> y
+<code>Producto.estado</code> son strings, no enums. La lista de items
+del request exige 1..n en API, pero la BD no impone la existencia de
+hijos.</p>
+<p>Las entidades son anémicas en el código actual:
+<code>crearPedido()</code> y <code>calcularEstadoProducto()</code>
+residen en <code>PedidoServiceImpl</code>; <code>crearReserva()</code>
+reside en <code>ReservaServiceImpl</code>. El diagrama muestra estas
+operaciones donde son implementadas, sin atribuirlas a las
+entidades.</p>
+<p>Fuente: <a
+href="diagrams/uml-clases-dominio.mmd"><code>uml-clases-dominio.mmd</code></a>.</p>
+<h3 id="secuencia-full-stack-de-crear-pedido">Secuencia Full Stack de
+crear pedido</h3>
+<p>El flujo incluye validación 400, idempotencia 409, producto ausente
+404, stock insuficiente 422, camino válido, bloqueo de producto,
+persistencia y respuesta 201. En el camino 422 la transacción revierte y
+no se guarda ni publica evento. La publicación del evento no tiene
+subscriber GIRC hoy.</p>
+<p>Fuente: <a
+href="diagrams/uml-secuencia-crear-pedido.mmd"><code>uml-secuencia-crear-pedido.mmd</code></a>.</p>
+<h3 id="despliegue">Despliegue</h3>
+<p>El entorno reproducible actual es Docker Compose: Nginx, API y
+PostgreSQL con volumen local. El diagrama distingue una propuesta de
+producción con TLS, secretos externos y PostgreSQL protegido; no se
+afirma que exista un VPS/cloud desplegado.</p>
+<p>Fuente: <a
+href="diagrams/uml-despliegue.mmd"><code>uml-despliegue.mmd</code></a>.</p>
+<h2 id="persistencia-y-orm">6. Persistencia y ORM</h2>
+<p>El diccionario detallado con tipo SQL, restricciones, claves,
+índices, significado y mapeo se encuentra en <a
+href="persistencia/diccionario-datos.md"><code>persistencia/diccionario-datos.md</code></a>.</p>
+<p>Buenas prácticas presentes: PK identity; SKU/código/idempotencia
+únicos; FK para detalles y cancha de reserva; <code>BigDecimal</code> en
+importes GIRC; <code>@Enumerated(EnumType.STRING)</code> en
+estados/tipos del módulo de reserva; <code>FetchType.LAZY</code> en
+relaciones Reserva-Cancha, Pedido-Detalles y Detalle-Pedido. Excepción
+detectada: <code>DetallePedido.producto</code> omite <code>fetch</code>,
+por lo que JPA lo deja EAGER.</p>
+<p><code>ddl-auto=update</code> es cómodo en desarrollo, pero para
+producción se recomienda Flyway/Liquibase. Validar FKs, CHECKs e índices
+en PostgreSQL real; H2 es evidencia de tests, no sustituto de todas las
+pruebas de dialecto.</p>
+<h2 id="diseño-limpio-y-patrones">7. Diseño limpio y patrones</h2>
+<h3 id="responsabilidadessolid-observables">Responsabilidades/SOLID
+observables</h3>
+<ul>
+<li><strong>SRP:</strong> <code>PedidoController</code> recibe HTTP;
+<code>PedidoServiceImpl</code> aplica reglas; repositories aíslan acceso
+a datos; <code>GlobalExceptionHandler</code> traduce excepciones.</li>
+<li><strong>DIP:</strong> servicios reciben interfaces repository y
+<code>ApplicationEventPublisher</code> por constructor
+(<code>@RequiredArgsConstructor</code>).</li>
+<li><strong>DTO:</strong> <code>CrearPedidoRequest</code> y su tipo
+<code>Item</code> aíslan y validan el contrato de entrada.</li>
+<li><strong>Repository:</strong>
+<code>PedidoRepository</code>/<code>ProductoRepository</code> abstraen
+persistencia; Spring Data genera operaciones CRUD.</li>
+<li><strong>Observer/Event:</strong> <code>PedidoServiceImpl</code>
+publica <code>PedidoCreadoEvent</code>. El patrón de publicación existe,
+pero falta un listener específico de pedidos.</li>
+<li><strong>Transacción:</strong> <code>@Transactional</code> mantiene
+actualización de stock y creación de pedido en una unidad atómica.</li>
+</ul>
+<h3
+id="brechas-recomendadas-antes-de-llamarlo-listo-para-producción">Brechas
+recomendadas antes de llamarlo listo para producción</h3>
+<ol type="1">
+<li>Crear <code>ProductoService</code> para que
+<code>ProductoController</code> no dependa directamente del
+repository.</li>
+<li>Definir DTO de respuesta de pedido/producto y evitar serializar
+entidades JPA directamente.</li>
+<li>Declarar <code>DetallePedido.producto</code> como
+<code>FetchType.LAZY</code> y probar serialización con OSIV
+apagado.</li>
+<li>Implementar seguridad (OIDC/JWT/roles), restringir CORS y no confiar
+en <code>idUsuario</code> del body.</li>
+<li>Añadir listener de <code>PedidoCreadoEvent</code> o retirar el
+evento si no se consume; usar Outbox si se exige durabilidad.</li>
+<li>Añadir migraciones de esquema, paginación de productos, índices
+medidos y pruebas de concurrencia PostgreSQL.</li>
+</ol>
+<h2 id="registros-de-decisiones-adrs">8. Registros de decisiones
+(ADRs)</h2>
+<ol type="1">
+<li><a href="adr/ADR-001-monolito-modular-en-capas.md">ADR-001 —
+Monolito modular en capas</a></li>
+<li><a href="adr/ADR-002-transacciones-y-bloqueo-pesimista.md">ADR-002 —
+Transacciones y bloqueo pesimista</a></li>
+<li><a href="adr/ADR-003-postgresql-y-jpa.md">ADR-003 — PostgreSQL y
+JPA</a></li>
+<li><a href="adr/ADR-004-seguridad-y-autenticacion.md">ADR-004 —
+Seguridad y autenticación</a> (propuesta / brecha)</li>
+</ol>
+<h2 id="pruebas-y-evidencia">9. Pruebas y evidencia</h2>
+<p>En la última validación registrada del repositorio se ejecutaron
+<strong>21 pruebas backend, 0 fallidas,
+<code>BUILD SUCCESS</code></strong>. El frontend pasó
+<code>npm ci</code> y <code>npm run build</code>. Las pruebas cubren
+servicio de pedidos, MockMvc, reglas de reservas heredadas y
+<code>@DataJpaTest</code> con H2 para solapamiento parcial, contigüidad
+y cancelación.</p>
+<p>La cobertura no representa una prueba de carga, seguridad,
+concurrencia real de PostgreSQL, integración SMTP ni despliegue TLS.
+Añadir evidencia si se ejecutan esas pruebas en el entorno del
+equipo.</p>
+<h2 id="cómo-presentar-el-trabajo-paso-a-paso">10. Cómo presentar el
+trabajo, paso a paso</h2>
+<ol type="1">
+<li>Presentar GIRC y delimitar actores: operador comercial/inventario y
+administrador conceptual; explicar que los roles aún no se
+autentican.</li>
+<li>Explicar por qué se eligió un monolito modular por capas y cómo una
+transacción protege el flujo de pedido.</li>
+<li>Recorrer C4 Contexto: quién usa el sistema y qué dependencia real
+existe; aclarar que SMTP y pagos no forman una integración GIRC
+actual.</li>
+<li>Recorrer C4 Contenedores: SPA, Nginx, API y PostgreSQL; separar
+desarrollo local de propuesta productiva.</li>
+<li>Recorrer Componentes: request validado, controller, service,
+repositories, entidades y handler; mencionar el acceso directo del
+controller de producto como mejora pendiente.</li>
+<li>Leer el UML de clases y explicar las cardinalidades, las FKs reales
+y los IDs de usuario escalares.</li>
+<li>Narrar la secuencia de pedido y detenerse en los <code>alt</code>:
+400, 409, 404, 422 y 201.</li>
+<li>Explicar el diccionario de datos, unicidad de idempotencia, FKs,
+precisión monetaria e índices heredados de reservas.</li>
+<li>Presentar ADRs como decisiones con alternativas y trade-offs, no
+como descripción genérica.</li>
+<li>Cerrar con evidencia: <code>mvn test</code>, build frontend y
+brechas de producción declaradas.</li>
+</ol>
+<h2 id="lista-de-entrega-del-equipo">11. Lista de entrega del
+equipo</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Completar integrantes, curso,
+docente e institución en esta portada.</label></li>
+<li><label><input type="checkbox" />Revisar términos y alcance contra
+las historias de usuario y OpenAPI aprobados por el
+profesor.</label></li>
+<li><label><input type="checkbox" />Revisar la sección de brechas con el
+equipo; no presentar pagos, autenticación, SMTP real o TLS como
+existentes.</label></li>
+<li><label><input type="checkbox" />Exportar este documento y la página
+de diagramas a PDF/Word desde un editor compatible si la plataforma
+exige ese formato. Los fuentes editables Mermaid permanecen bajo
+<code>docs/hito-2/diagrams/</code>.</label></li>
+<li><label><input type="checkbox" />Adjuntar capturas de las pruebas/CI
+si las solicitan.</label></li>
+</ul>
+<h1 id="anexo-a---diagramas-renderizados">Anexo A - Diagramas
+renderizados</h1>
+<h2 id="c4-level-1---context">C4 Level 1 - Context</h2>
+<figure>
+<img src="rendered/c4-contexto.png" style="width:6.3in"
+alt="C4 Level 1 - Context" />
+<figcaption aria-hidden="true">C4 Level 1 - Context</figcaption>
+</figure>
+<h2 id="c4-level-2---containers">C4 Level 2 - Containers</h2>
+<figure>
+<img src="rendered/c4-contenedores.png" style="width:6.3in"
+alt="C4 Level 2 - Containers" />
+<figcaption aria-hidden="true">C4 Level 2 - Containers</figcaption>
+</figure>
+<h2 id="c4-level-3---backend-components">C4 Level 3 - Backend
+components</h2>
+<figure>
+<img src="rendered/c4-componentes-backend.png" style="width:6.3in"
+alt="C4 Level 3 - Backend components" />
+<figcaption aria-hidden="true">C4 Level 3 - Backend
+components</figcaption>
+</figure>
+<h2 id="uml---domain-classes">UML - Domain classes</h2>
+<figure>
+<img src="rendered/uml-clases-dominio.png" style="width:6.3in"
+alt="UML - Domain classes" />
+<figcaption aria-hidden="true">UML - Domain classes</figcaption>
+</figure>
+<h2 id="uml---full-stack-order-sequence">UML - Full Stack order
+sequence</h2>
+<figure>
+<img src="rendered/uml-secuencia-crear-pedido.png" style="width:6.3in"
+alt="UML - Full Stack order sequence" />
+<figcaption aria-hidden="true">UML - Full Stack order
+sequence</figcaption>
+</figure>
+<h2 id="uml---deployment">UML - Deployment</h2>
+<figure>
+<img src="rendered/uml-despliegue.png" style="width:6.3in"
+alt="UML - Deployment" />
+<figcaption aria-hidden="true">UML - Deployment</figcaption>
+</figure>
+<h1 id="anexo-b---diccionario-de-datos">Anexo B - Diccionario de
+datos</h1>
+<h1 id="diccionario-de-datos-y-mapeo-jpa">Diccionario de datos y mapeo
+JPA</h1>
+<p><strong>Motor objetivo:</strong> PostgreSQL 16. Los tipos SQL
+corresponden al mapeo PostgreSQL habitual de Hibernate 6. El DDL
+definitivo debe verificarse con migraciones antes de producción. La
+aplicación usa actualmente
+<code>spring.jpa.hibernate.ddl-auto=update</code>; no hay
+Flyway/Liquibase ni scripts versionados de migración.</p>
+<h2 id="tablas-girc-inventario-y-pedidos">Tablas GIRC: inventario y
+pedidos</h2>
+<h3 id="productos"><code>productos</code></h3>
+<p>Entidad <code>com.courtsync.pro.domain.entity.Producto</code>.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Columna</th>
+<th>Tipo SQL</th>
+<th>Restricciones observadas</th>
+<th>ORM / descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>BIGINT</code></td>
+<td>PK, identity</td>
+<td><code>@Id</code>, <code>@GeneratedValue(IDENTITY)</code></td>
+</tr>
+<tr>
+<td><code>sku</code></td>
+<td><code>VARCHAR(50)</code></td>
+<td>NOT NULL, UNIQUE</td>
+<td>Código comercial, <code>@Column(unique=true)</code></td>
+</tr>
+<tr>
+<td><code>nombre_producto</code></td>
+<td><code>VARCHAR(150)</code></td>
+<td>NOT NULL</td>
+<td>Nombre visible</td>
+</tr>
+<tr>
+<td><code>precio_unitario</code></td>
+<td><code>NUMERIC(12,2)</code></td>
+<td>NOT NULL; <code>@DecimalMin("0.0")</code></td>
+<td><code>BigDecimal</code>, precio unitario</td>
+</tr>
+<tr>
+<td><code>stock_actual</code></td>
+<td><code>INTEGER</code></td>
+<td>NOT NULL; <code>@Min(0)</code></td>
+<td>Existencias disponibles</td>
+</tr>
+<tr>
+<td><code>stock_minimo</code></td>
+<td><code>INTEGER</code></td>
+<td>NOT NULL; <code>@Min(1)</code></td>
+<td>Umbral de alerta</td>
+</tr>
+<tr>
+<td><code>estado</code></td>
+<td><code>VARCHAR(20)</code></td>
+<td>NOT NULL</td>
+<td><code>String</code>: Disponible, Crítico o Agotado; recalculado por
+service</td>
+</tr>
+</tbody>
+</table>
+<p>Índice único en <code>sku</code>. La consulta del catálogo hoy usa
+<code>findAll()</code> sin paginación.</p>
+<h3 id="pedidos"><code>pedidos</code></h3>
+<p>Entidad <code>Pedido</code>.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Columna</th>
+<th>Tipo SQL</th>
+<th>Restricciones observadas</th>
+<th>ORM / descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>BIGINT</code></td>
+<td>PK, identity</td>
+<td>Identificador</td>
+</tr>
+<tr>
+<td><code>codigo_orden</code></td>
+<td><code>VARCHAR(40)</code></td>
+<td>NOT NULL, UNIQUE</td>
+<td>Código <code>ORD-...</code></td>
+</tr>
+<tr>
+<td><code>id_usuario</code></td>
+<td><code>BIGINT</code></td>
+<td>NOT NULL, sin FK JPA</td>
+<td>ID escalar aportado por request; no autentica identidad</td>
+</tr>
+<tr>
+<td><code>clave_idempotencia</code></td>
+<td><code>VARCHAR(100)</code></td>
+<td>NOT NULL, UNIQUE</td>
+<td>Evita reutilización de clave</td>
+</tr>
+<tr>
+<td><code>total_neto</code></td>
+<td><code>NUMERIC(12,2)</code></td>
+<td>NOT NULL</td>
+<td>Suma de subtotales</td>
+</tr>
+<tr>
+<td><code>estado</code></td>
+<td><code>VARCHAR(30)</code></td>
+<td>NOT NULL</td>
+<td><code>String</code>, estado inicial Pendiente; no enum</td>
+</tr>
+<tr>
+<td><code>fecha_creacion</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>NOT NULL</td>
+<td><code>OffsetDateTime</code> UTC</td>
+</tr>
+</tbody>
+</table>
+<p>Relación <code>Pedido 1 -&gt; 0..N DetallePedido</code>,
+<code>@OneToMany(cascade=ALL, orphanRemoval=true)</code>. El request
+valida lista no vacía, pero el esquema no fuerza que toda orden tenga
+detalle.</p>
+<h3 id="detalles_pedido"><code>detalles_pedido</code></h3>
+<p>Entidad <code>DetallePedido</code>.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Columna</th>
+<th>Tipo SQL</th>
+<th>Restricciones observadas</th>
+<th>ORM / descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>BIGINT</code></td>
+<td>PK, identity</td>
+<td>Identificador</td>
+</tr>
+<tr>
+<td><code>pedido_id</code></td>
+<td><code>BIGINT</code></td>
+<td>NOT NULL, FK -&gt; <code>pedidos.id</code></td>
+<td><code>@ManyToOne(fetch=LAZY)</code></td>
+</tr>
+<tr>
+<td><code>producto_id</code></td>
+<td><code>BIGINT</code></td>
+<td>NOT NULL, FK -&gt; <code>productos.id</code></td>
+<td><code>@ManyToOne</code>; actualmente hereda EAGER por omitir
+<code>fetch</code></td>
+</tr>
+<tr>
+<td><code>cantidad_solicitada</code></td>
+<td><code>INTEGER</code></td>
+<td>NOT NULL</td>
+<td>Unidades pedidas</td>
+</tr>
+<tr>
+<td><code>precio_unitario</code></td>
+<td><code>NUMERIC(12,2)</code></td>
+<td>NOT NULL</td>
+<td>Precio histórico al momento de compra</td>
+</tr>
+<tr>
+<td><code>subtotal</code></td>
+<td><code>NUMERIC(12,2)</code></td>
+<td>NOT NULL</td>
+<td>Precio por cantidad</td>
+</tr>
+</tbody>
+</table>
+<p>PostgreSQL no crea índices automáticamente sobre FKs. Evaluar índices
+en <code>pedido_id</code> y <code>producto_id</code> según
+consultas/volumen.</p>
+<h2 id="entidades-heredadas-de-reservas">Entidades heredadas de
+reservas</h2>
+<p>Se conservan para respetar la plantilla del curso; no son el flujo de
+inventario GIRC.</p>
+<h3 id="jugadores"><code>jugadores</code></h3>
+<table>
+<thead>
+<tr>
+<th>Columna</th>
+<th>Tipo SQL</th>
+<th>Restricciones</th>
+<th>Mapeo / significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>BIGINT</code></td>
+<td>PK, identity</td>
+<td>ID</td>
+</tr>
+<tr>
+<td><code>nombre</code></td>
+<td><code>VARCHAR(120)</code></td>
+<td>NOT NULL</td>
+<td>Nombre</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td><code>VARCHAR(160)</code></td>
+<td>NOT NULL, UNIQUE</td>
+<td>Correo</td>
+</tr>
+</tbody>
+</table>
+<h3 id="canchas"><code>canchas</code></h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Columna</th>
+<th>Tipo SQL</th>
+<th>Restricciones</th>
+<th>Mapeo / significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>BIGINT</code></td>
+<td>PK, identity</td>
+<td>ID</td>
+</tr>
+<tr>
+<td><code>nombre</code></td>
+<td><code>VARCHAR(150)</code></td>
+<td>NOT NULL</td>
+<td>Nombre</td>
+</tr>
+<tr>
+<td><code>tipo_cancha</code></td>
+<td><code>VARCHAR(30)</code></td>
+<td>NOT NULL</td>
+<td><code>@Enumerated(STRING)</code>, <code>TipoCancha</code></td>
+</tr>
+<tr>
+<td><code>tarifa_hora</code></td>
+<td><code>DOUBLE PRECISION</code></td>
+<td>NOT NULL</td>
+<td>Tarifa</td>
+</tr>
+<tr>
+<td><code>activa</code></td>
+<td><code>BOOLEAN</code></td>
+<td>NOT NULL</td>
+<td>Indicador activo</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reservas"><code>reservas</code></h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Columna</th>
+<th>Tipo SQL</th>
+<th>Restricciones</th>
+<th>Mapeo / significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>BIGINT</code></td>
+<td>PK, identity</td>
+<td>ID</td>
+</tr>
+<tr>
+<td><code>codigo_confirmacion</code></td>
+<td><code>VARCHAR(30)</code></td>
+<td>NOT NULL, UNIQUE</td>
+<td>Código de reserva</td>
+</tr>
+<tr>
+<td><code>cancha_id</code></td>
+<td><code>BIGINT</code></td>
+<td>NOT NULL, FK -&gt; <code>canchas.id</code></td>
+<td><code>ManyToOne(fetch=LAZY)</code></td>
+</tr>
+<tr>
+<td><code>usuario_id</code></td>
+<td><code>BIGINT</code></td>
+<td>NOT NULL, sin FK JPA a jugadores</td>
+<td>ID escalar</td>
+</tr>
+<tr>
+<td><code>fecha_hora_inicio</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>NOT NULL</td>
+<td>Inicio</td>
+</tr>
+<tr>
+<td><code>fecha_hora_fin</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>NOT NULL</td>
+<td>Fin</td>
+</tr>
+<tr>
+<td><code>duracion_horas</code></td>
+<td><code>INTEGER</code></td>
+<td>NOT NULL</td>
+<td>Duración</td>
+</tr>
+<tr>
+<td><code>valor_total</code></td>
+<td><code>DOUBLE PRECISION</code></td>
+<td>NOT NULL</td>
+<td>Importe heredado</td>
+</tr>
+<tr>
+<td><code>valor_anticipo</code></td>
+<td><code>DOUBLE PRECISION</code></td>
+<td>NOT NULL</td>
+<td>Importe heredado</td>
+</tr>
+<tr>
+<td><code>estado</code></td>
+<td><code>VARCHAR(30)</code></td>
+<td>NOT NULL</td>
+<td><code>@Enumerated(STRING)</code>, <code>EstadoReserva</code></td>
+</tr>
+<tr>
+<td><code>fecha_creacion</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>NOT NULL</td>
+<td>Fecha creación</td>
+</tr>
+<tr>
+<td><code>fecha_expiracion_pago</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>NOT NULL</td>
+<td>Expiración</td>
+</tr>
+</tbody>
+</table>
+<p>Índices compuestos declarados:
+<code>idx_reservas_cancha_inicio_estado (cancha_id, fecha_hora_inicio, estado)</code>
+para disponibilidad y
+<code>idx_reservas_usuario_inicio (usuario_id, fecha_hora_inicio)</code>
+para límite diario.</p>
+<h2 id="integridad-y-notas-para-producción">Integridad y notas para
+producción</h2>
+<ul>
+<li>Las anotaciones Jakarta Validation validan request/entidades, pero
+no se debe asumir que <code>ddl-auto=update</code> ha creado todos los
+CHECK constraints en bases existentes. Inspeccionar DDL real.</li>
+<li>FKs actuales: <code>detalles_pedido.pedido_id</code>,
+<code>detalles_pedido.producto_id</code>,
+<code>reservas.cancha_id</code>. Los IDs de usuario no tienen FK.</li>
+<li>Cambiar <code>ddl-auto=update</code> por migraciones versionadas
+para producción.</li>
+<li>DTOs de respuesta recomendados: <code>PedidoController</code>
+actualmente responde una entidad y <code>Pedido.detalles</code> es LAZY;
+comprobar serialización con <code>open-in-view=false</code>.</li>
+<li>GIRC usa <code>BigDecimal</code>; reservas heredadas aún usa
+<code>Double</code> para dinero.</li>
+</ul>
+<h1 id="anexo-c---trazabilidad-rnf">Anexo C - Trazabilidad RNF</h1>
+<h1 id="trazabilidad-de-requisitos-no-funcionales">Trazabilidad de
+requisitos no funcionales</h1>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>RNF / requisito</th>
+<th>Diseño actual</th>
+<th>Evidencia verificable</th>
+<th>Brecha / seguimiento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Concurrencia de inventario RNF-02</td>
+<td><code>@Transactional</code> + <code>@Lock(PESSIMISTIC_WRITE)</code>
+en ProductoRepository</td>
+<td><code>PedidoServiceImpl</code>, tests de stock en
+<code>PedidoServiceTest</code></td>
+<td>Agregar prueba concurrente con PostgreSQL, bloqueo ordenado por ID,
+timeout y métrica</td>
+</tr>
+<tr>
+<td>Rendimiento</td>
+<td>Índices compuestos <code>reservas</code> y consulta agregada de
+disponibilidad</td>
+<td><code>ReservaRepository</code>,
+<code>ReservaRepositoryDataJpaTest</code></td>
+<td><code>GET /productos</code> sin paginación; P95 no medido;
+planificar carga/EXPLAIN</td>
+</tr>
+<tr>
+<td>Seguridad</td>
+<td>Validación de request y <code>GlobalExceptionHandler</code></td>
+<td><code>PedidoControllerTest</code></td>
+<td>No hay autenticación/autorización; CORS <code>*</code>; no publicar
+expuesto</td>
+</tr>
+<tr>
+<td>Mantenibilidad</td>
+<td>Paquetes controller/service/repository/domain/dto/exception</td>
+<td>Interfaces <code>PedidoService</code>,
+<code>PedidoRepository</code>, DTO de entrada</td>
+<td><code>ProductoController</code> salta service; controller devuelve
+entidad Pedido</td>
+</tr>
+<tr>
+<td>Resiliencia de evento</td>
+<td><code>ApplicationEventPublisher</code> para
+<code>PedidoCreadoEvent</code></td>
+<td><code>PedidoServiceTest</code> verifica publish/never</td>
+<td>Evento solo memoria y sin listener GIRC; Outbox/listener si requiere
+entrega durable</td>
+</tr>
+<tr>
+<td>Persistencia</td>
+<td>PostgreSQL + JPA, H2 en <code>@DataJpaTest</code></td>
+<td><code>ReservaRepositoryDataJpaTest</code></td>
+<td>Integración de consultas de pedidos contra Postgres no creada; sin
+Flyway/Liquibase</td>
+</tr>
+<tr>
+<td>Disponibilidad/despliegue</td>
+<td>Docker Compose separa frontend, backend y DB</td>
+<td><code>docker-compose.yml</code></td>
+<td>No hay TLS, backup, healthchecks para API/frontend ni observabilidad
+productiva</td>
+</tr>
+</tbody>
+</table>
+<h1 id="anexo-d---evidencia-solid-y-patrones">Anexo D - Evidencia SOLID
+y patrones</h1>
+<h1 id="evidencia-de-diseño-limpio-solid-y-patrones">Evidencia de diseño
+limpio, SOLID y patrones</h1>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Principio/patrón</th>
+<th>Evidencia en código</th>
+<th>Explicación</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single Responsibility</td>
+<td><code>PedidoController</code>, <code>PedidoServiceImpl</code>,
+repositorios, <code>GlobalExceptionHandler</code></td>
+<td>HTTP, reglas, persistencia y traducción de errores están en
+responsabilidades diferentes</td>
+<td>Aplicado en pedido</td>
+</tr>
+<tr>
+<td>Dependency Inversion</td>
+<td><code>PedidoService</code> y repositorios inyectados por constructor
+(<code>@RequiredArgsConstructor</code>)</td>
+<td>Servicio depende de contratos Spring Data/interfaces, no crea
+dependencias concretas manualmente</td>
+<td>Aplicado</td>
+</tr>
+<tr>
+<td>DTO</td>
+<td><code>CrearPedidoRequest</code> como record con validaciones
+anidadas</td>
+<td>Contrato de entrada desacoplado de validación de dominio</td>
+<td>Aplicado en entrada; respuesta sigue exponiendo entidad</td>
+</tr>
+<tr>
+<td>Repository</td>
+<td><code>PedidoRepository</code>, <code>ProductoRepository</code>,
+<code>ReservaRepository</code></td>
+<td>Abstracción de persistencia y consultas derivadas/JPQL</td>
+<td>Aplicado</td>
+</tr>
+<tr>
+<td>Observer / Event</td>
+<td><code>ApplicationEventPublisher</code> +
+<code>PedidoCreadoEvent</code>; <code>ReservaCreadaEvent</code> +
+<code>NotificacionListener</code></td>
+<td>Notifica publicación sin que el service invoque directamente un
+transporte externo</td>
+<td>Parcial: no hay listener para eventos PedidoCreadoEvent; listener de
+reserva solo escribe log</td>
+</tr>
+<tr>
+<td>Strategy</td>
+<td>No se encontró una implementación Strategy en el estado actual</td>
+<td>No afirmar que está aplicada; sería útil si aparecen políticas
+variables de precio/stock</td>
+<td>No aplicado</td>
+</tr>
+<tr>
+<td>Factory</td>
+<td>No hay factory de dominio explícita</td>
+<td>La creación se realiza con Lombok Builder en service</td>
+<td>No aplicado como patrón Factory</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mejora-concreta-priorizada">Mejora concreta priorizada</h2>
+<p>Crear <code>ProductoService</code> para mover la consulta
+<code>findAll()</code> fuera de <code>ProductoController</code>, y crear
+<code>PedidoResponse</code>/<code>DetallePedidoResponse</code> para que
+la API no serialice entidades JPA directamente. Esta evolución mejora
+SRP, límites de contrato y control de carga lazy sin cambiar las reglas
+de negocio.</p>
+<h1 id="anexo-e---adrs">Anexo E - ADRs</h1>
+<h1 id="adr-001-monolito-modular-con-arquitectura-en-capas">ADR-001:
+Monolito modular con arquitectura en capas</h1>
+<ul>
+<li><strong>Estado:</strong> Aceptada</li>
+<li><strong>Fecha:</strong> 2026-11-21</li>
+</ul>
+<h2 id="contexto-y-problema">Contexto y problema</h2>
+<p>GIRC es un MVP académico con un flujo transaccional de consulta de
+inventario y creación de pedidos. Se requiere separar la API, reglas de
+negocio y persistencia sin añadir infraestructura distribuida difícil de
+probar. La mantenibilidad pide aislar cambios de reglas; la integridad
+exige transacciones para pedido y stock.</p>
+<h2 id="alternativas-evaluadas">Alternativas evaluadas</h2>
+<ol type="1">
+<li>Arquitectura en capas en un monolito modular.</li>
+<li>Microservicios separados para catálogo, inventario y pedidos.</li>
+<li>Arquitectura hexagonal/Clean completa con puertos y
+adaptadores.</li>
+</ol>
+<h2 id="decisión-tomada">Decisión tomada</h2>
+<p>Adoptar un <strong>monolito modular organizado en capas</strong>.
+React es un cliente SPA separado y Spring Boot es el backend
+desplegable, que contiene módulos GIRC y clases de reservas
+heredadas.</p>
+<h2 id="consecuencias-y-trade-offs">Consecuencias y trade-offs</h2>
+<ul>
+<li><strong>Positivas:</strong> despliegue y pruebas simples; una
+transacción JPA protege pedido y existencias; límites entendibles para
+el equipo.</li>
+<li><strong>Negativas:</strong> el escalado se hace para toda la API; un
+despliegue afecta a todos los módulos; las capas no garantizan por sí
+solas bajo acoplamiento.</li>
+<li><strong>Desviación actual:</strong>
+<code>PedidoController -&gt; PedidoService -&gt; repositories</code>
+respeta el flujo. <code>ProductoController</code> accede directamente a
+<code>ProductoRepository</code>; para aplicar estrictamente service
+layer debe introducirse <code>ProductoService</code>.</li>
+<li>No se declara arquitectura hexagonal: no existen puertos/adaptadores
+para persistencia, correo o pagos.</li>
+</ul>
+<h1
+id="adr-002-transacciones-y-bloqueo-pesimista-de-existencias">ADR-002:
+Transacciones y bloqueo pesimista de existencias</h1>
+<ul>
+<li><strong>Estado:</strong> Aceptada</li>
+<li><strong>Fecha:</strong> 2026-11-21</li>
+</ul>
+<h2 id="contexto-y-problema-1">Contexto y problema</h2>
+<p>Pedidos concurrentes podrían leer el mismo <code>stockActual</code> y
+vender unidades por encima de las disponibles. RNF-02 exige integridad;
+RN-02.1 exige HTTP 422 sin guardar ni publicar evento si el stock es
+insuficiente.</p>
+<h2 id="alternativas-evaluadas-1">Alternativas evaluadas</h2>
+<ol type="1">
+<li><code>@Transactional</code> + <code>PESSIMISTIC_WRITE</code> por
+producto.</li>
+<li>Control optimista con <code>@Version</code>, conflictos y
+reintentos.</li>
+<li>Actualización SQL condicional
+(<code>stock_actual &gt;= cantidad</code>) y comprobar filas
+afectadas.</li>
+</ol>
+<h2 id="decisión-tomada-1">Decisión tomada</h2>
+<p><code>PedidoServiceImpl.crearPedido()</code> es
+<code>@Transactional</code>; consulta cada producto con
+<code>ProductoRepository.findByIdWithLock()</code>
+(<code>@Lock(PESSIMISTIC_WRITE)</code>), valida todas las líneas y
+después muta las entidades administradas, guarda pedido/detalles y
+publica <code>PedidoCreadoEvent</code>. Las excepciones runtime provocan
+rollback.</p>
+<h2 id="consecuencias-y-trade-offs-1">Consecuencias y trade-offs</h2>
+<ul>
+<li><strong>Positivas:</strong> serializa escrituras sobre la fila de
+producto; el pedido y los detalles se escriben en la transacción; tests
+verifican no guardar/evento en stock insuficiente.</li>
+<li><strong>Negativas:</strong> locks largos reducen concurrencia;
+pedidos multítem que toman filas en distinto orden pueden aumentar
+riesgo de deadlock; el publisher en memoria no es durable.</li>
+<li><strong>Mitigaciones recomendadas:</strong> bloquear IDs en orden
+ascendente, definir timeout, medir contención y considerar Outbox si el
+evento debe sobrevivir a fallos.</li>
+<li><strong>Brecha:</strong> no hay prueba concurrente de dos
+transacciones contra PostgreSQL; la cobertura de bloqueo se infiere de
+la anotación/repositorio y pruebas funcionales.</li>
+</ul>
+<h1 id="adr-003-postgresql-y-spring-data-jpa">ADR-003: PostgreSQL y
+Spring Data JPA</h1>
+<ul>
+<li><strong>Estado:</strong> Aceptada</li>
+<li><strong>Fecha:</strong> 2026-11-21</li>
+</ul>
+<h2 id="contexto-y-problema-2">Contexto y problema</h2>
+<p>El sistema necesita relaciones referenciales entre pedidos, detalles
+y productos, unicidad de SKU/idempotencia y transacciones con bloqueo de
+filas. También se busca una base embebida para pruebas.</p>
+<h2 id="alternativas-evaluadas-2">Alternativas evaluadas</h2>
+<ol type="1">
+<li>PostgreSQL + Spring Data JPA/Hibernate.</li>
+<li>MySQL/MariaDB + JPA.</li>
+<li>Base documental con consistencia de stock gestionada por
+aplicación.</li>
+</ol>
+<h2 id="decisión-tomada-2">Decisión tomada</h2>
+<p>PostgreSQL 16 para ejecución con Docker Compose y Spring Data JPA
+para persistencia. H2 se usa con <code>@DataJpaTest</code>. Las
+entidades declaran PK, <code>UNIQUE</code>, <code>NOT NULL</code>, FKs e
+índices de las consultas heredadas de reservas.</p>
+<h2 id="consecuencias-y-trade-offs-2">Consecuencias y trade-offs</h2>
+<ul>
+<li><strong>Positivas:</strong> ACID, FKs, importes GIRC en
+<code>BigDecimal/NUMERIC(12,2)</code> y soporte de bloqueos.</li>
+<li><strong>Negativas:</strong> <code>data.sql</code> usa SQL PostgreSQL
+(<code>ON CONFLICT</code>, <code>setval</code>), por lo que se desactiva
+en pruebas H2; pueden existir diferencias de dialecto.</li>
+<li><strong>Riesgo:</strong> <code>ddl-auto=update</code> no es
+migración reproducible para producción.</li>
+<li><strong>Siguiente paso:</strong> adoptar Flyway/Liquibase, versionar
+DDL e índices y ejecutar pruebas de integración contra PostgreSQL en
+CI.</li>
+</ul>
+<h1 id="adr-004-autenticación-y-autorización-de-operadores">ADR-004:
+Autenticación y autorización de operadores</h1>
+<ul>
+<li><strong>Estado:</strong> Propuesta / brecha identificada</li>
+<li><strong>Fecha:</strong> 2026-11-21</li>
+</ul>
+<h2 id="contexto-y-problema-3">Contexto y problema</h2>
+<p>GIRC recibe <code>idUsuario</code> en el request de pedido, pero
+actualmente no tiene Spring Security, JWT, sesión ni autorización por
+rol. CORS permite <code>*</code>. El <code>idUsuario</code> enviado por
+el cliente no autentica identidad y es manipulable.</p>
+<h2 id="alternativas-evaluadas-3">Alternativas evaluadas</h2>
+<ol type="1">
+<li>Spring Security stateless con JWT/OIDC.</li>
+<li>Sesión web con cookie segura.</li>
+<li>Mantener API pública, solo para demo local sin datos sensibles.</li>
+</ol>
+<h2 id="decisión-tomada-3">Decisión tomada</h2>
+<p>El MVP académico conserva ejecución local sin autenticación, pero se
+declara <strong>no apto para publicar con acceso abierto</strong>. Para
+producción se propone integrar proveedor OIDC/JWT, definir roles
+(<code>ADMIN_INVENTARIO</code>, <code>VENDEDOR</code>), tomar el usuario
+del principal autenticado, retirar CORS wildcard y proteger operaciones
+de escritura.</p>
+<h2 id="consecuencias-y-trade-offs-3">Consecuencias y trade-offs</h2>
+<ul>
+<li><strong>Positivas del MVP:</strong> tests MockMvc y demostración
+local simples.</li>
+<li><strong>Negativas:</strong> cualquier cliente que alcance la API
+puede intentar crear pedidos; el usuario del body no es confiable;
+faltan auditoría y autorización.</li>
+<li><strong>Criterios futuros:</strong> tests 401/403, roles probados,
+secretos externos y CORS restringido a orígenes permitidos.</li>
+</ul>
+</body>
+</html>
